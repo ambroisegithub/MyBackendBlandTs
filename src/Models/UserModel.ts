@@ -8,7 +8,9 @@ export const UserSchemaValidate = Joi.object({
     gender: Joi.string().valid('male', 'female', 'other').required(),
     password: Joi.string().min(6).required(),
     confirmPassword: Joi.string().valid(Joi.ref('password')).required(),
+    userRole: Joi.string().valid('admin', 'user').default('user'), 
 });
+
 
 // Creating an interface
 interface IUser {
@@ -16,6 +18,7 @@ interface IUser {
     email: string;
     gender: string;
     password: string;
+    userRole: string;
 }
 
 // User schema
@@ -37,6 +40,11 @@ const userSchema = new Schema<IUser>({
         type: String,
         required: true,
         enum: ['male', 'female', 'other'],
+    },
+    userRole: {
+        type: String,
+        enum: ['admin', 'user'], 
+        default: 'user',
     },
 
     password: {
