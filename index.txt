@@ -1,0 +1,33 @@
+git rm --cached .env
+git rm --cached .env.local
+git rm --cached -r node_modules/
+
+
+BodyParser:It processes incoming request bodies, making it easier to handle POST and PUT requests.
+By parsing the body of an HTTP request and attaching it to the req. body property,
+it simplifies data extraction and manipulation in server-side logic.
+
+
+express is imported as the main framework for building the web application.
+
+dotenv is imported to handle environment variables.
+
+cors is imported to enable Cross-Origin Resource Sharing.
+
+helmet is imported to add security headers to HTTP responses.
+
+The code checks if the PORT environment variable is defined. If not, a message is logged to the console.
+
+The PORT variable is parsed from a string to an integer using parseInt().
+
+An instance of the Express application is created using express() and assigned to the app variable.
+
+Middleware functions are added to the Express application:
+
+express.json() is used to parse JSON bodies of incoming requests.
+
+express.urlencoded({extended : true}) is used to parse URL-encoded bodies of incoming requests.
+
+cors() is used to enable Cross-Origin Resource Sharing.
+
+helmet() is used to enhance the security of the application by setting various HTTP headers.

@@ -20,6 +20,7 @@
     "@types/express": "^4.17.21",
     "@types/helmet": "^4.0.0",
     "@types/http-status-codes": "^1.2.0",
+    "@types/jsonwebtoken": "^9.0.6",
     "@types/mongoose": "^5.11.97",
     "@types/morgan": "^1.9.9",
     "@types/node": "^20.11.25",
@@ -30,7 +31,10 @@
   },
   "dependencies": {
     "babel-node": "^0.0.1-security",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
+    "joi": "^17.12.2",
+    "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
     "nodemon": "^3.1.0"
   }
