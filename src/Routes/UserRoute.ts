@@ -1,5 +1,4 @@
 // UserRoutes.ts
-
 import { Router } from 'express';
 import userController  from '../Controllers/UserController';
 
@@ -10,5 +9,6 @@ userRoutes.get('/all', userController.getAllUsers);
 userRoutes.get('/:id', userController.getUserById);
 userRoutes.put('/:id', userController.updateUser);
 userRoutes.delete('/:id', userController.deleteUser);
+userRoutes.post('/login', userController.loginUser);
 
 export default userRoutes;
