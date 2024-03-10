@@ -5,7 +5,7 @@ import { Request, Response } from "express";
 
 class BlogController {
     static async createBlog(req: Request, res: Response) {
-        // try {
+        try {
           const { error } = validateBlogModelData(req.body);
           if (error) {
             return res.status(400).send(error.details[0].message);
@@ -32,12 +32,12 @@ class BlogController {
             data: savedBlog,
             message: "Blog successfully created",
           });
-        // } catch (error) {
-        //     console.error(error);
-        //     return res.status(500).json({
-        //       error: "Internal Server Error",
-        //     });
-        //   }
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({
+              error: "Internal Server Error",
+            });
+          }
       }
     
       static async updateBlog(req: Request, res: Response) {
