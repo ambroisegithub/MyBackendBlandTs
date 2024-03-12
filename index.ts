@@ -14,8 +14,8 @@ mongoose
   .catch((err:Error) => {
     console.log(err);
   });
-  const PORT:number = Number(process.env.PORT||8888);
-  app.listen(PORT|8888,()=>{
+  const PORT:number = Number(process.env.PORT);
+  app.listen(PORT,()=>{
     console.log(`The Server is connected on ${PORT}`)
   })
 
