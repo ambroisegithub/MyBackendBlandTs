@@ -1,6 +1,7 @@
 import bodyParser from "body-parser";
 import morgan from "morgan";
 import  { Application, Request, Response } from "express";
+import commentRoutes from "./src/Routes/commentRoutes";
 // import upload from "./src/Helpers/multer";
 import userRoutes from "./src/Routes/UserRoute"
 import blogRoutes from "./src/Routes/BlogRoute";
@@ -17,8 +18,7 @@ app.use(morgan("dev"));
 // app.use(upload.single("image"));
 app.use('/api/user', userRoutes);
 app.use('/api/blog', blogRoutes);
-
-
+app.use('/api/blog', commentRoutes);
 app.get("/", (req: Request, res: Response) => {
     return res.json({ message: "Welcome  To My portfolio API" });
   });

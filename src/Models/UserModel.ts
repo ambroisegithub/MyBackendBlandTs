@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model, Document } from 'mongoose';
 import Joi from 'joi';
 
 // Validation schema
@@ -11,9 +11,8 @@ export const UserSchemaValidate = Joi.object({
     userRole: Joi.string().valid('admin', 'user').default('user'), 
 });
 
-
 // Creating an interface
-interface IUser {
+export interface IUser extends Document {
     fullName: string;
     email: string;
     gender: string;
@@ -27,7 +26,6 @@ const userSchema = new Schema<IUser>({
         type: String,
         required: true,
     },
-
     email: {
         type: String,
         required: true,
@@ -35,7 +33,6 @@ const userSchema = new Schema<IUser>({
         lowercase: true,
         trim: true,
     },
-
     gender: {
         type: String,
         required: true,
@@ -46,7 +43,6 @@ const userSchema = new Schema<IUser>({
         enum: ['admin', 'user'], 
         default: 'user',
     },
-
     password: {
         type: String,
         required: true,
