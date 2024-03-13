@@ -182,6 +182,7 @@ static async updateUser(req: Request, res: Response) {
       return res.status(500).json({ error: 'Internal Server Error' });
     }
   }
+  
   static async logout(req: Request, res: Response) {
     try {
       const authHeader = req.headers['cookie']; // get the session cookie from request header

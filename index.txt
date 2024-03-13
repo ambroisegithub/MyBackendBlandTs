@@ -1,6 +1,7 @@
 git rm --cached .env
 git rm --cached .env.local
 git rm --cached -r node_modules/
+rm -rf .git
 
 
 BodyParser:It processes incoming request bodies, making it easier to handle POST and PUT requests.
