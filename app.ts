@@ -6,6 +6,7 @@ import commentRoutes from "./src/Routes/commentRoutes";
 import userRoutes from "./src/Routes/UserRoute"
 import blogRoutes from "./src/Routes/BlogRoute";
 import contactUsRoutes from "./src/Routes/contactUsRoutes";
+import subscribeRoutes from "./src/Routes/subscribeRoute";
 import cors from "cors";
 import express  from "express";
 import helmet from "helmet";
@@ -21,6 +22,8 @@ app.use('/api/user', userRoutes);
 app.use('/api/blog', blogRoutes);
 app.use('/api/blog', commentRoutes);
 app.use('/api/contactus', contactUsRoutes);
+app.use('/api/subscribe', subscribeRoutes);
+
 
 app.get("/", (req: Request, res: Response) => {
     return res.json({ message: "Welcome  To My portfolio API" });

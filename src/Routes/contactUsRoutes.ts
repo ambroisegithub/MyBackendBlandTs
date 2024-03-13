@@ -1,9 +1,7 @@
 // ContactUsRoutes.ts
 import { Router } from 'express';
 import ContactUsController from '../Controllers/contactUsController';
-
 const contactUsRoutes = Router();
-
 contactUsRoutes.post('/post-contact-us', ContactUsController.createContactUs);
 contactUsRoutes.put('/update-contact-us/:id', ContactUsController.updateContactUs);
 contactUsRoutes.get('/getall-contact-us', ContactUsController.getAllContactUs);
