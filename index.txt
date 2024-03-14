@@ -241,3 +241,110 @@ export const createComment = async (req, res) => {
 
 // export default app;
 
+
+
+
+index.test
+
+
+
+
+import bodyParser from "body-parser";
+import morgan from "morgan";
+import express, { Application, Request, Response } from "express";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+
+import cors from "cors";
+import helmet from "helmet";
+
+dotenv.config();
+
+mongoose.set("strictQuery", false);
+
+// Exporting a function to establish the database connection
+export const connectToDatabase = async () => {
+  await mongoose.connect(process.env.MONGODB_URL_TEST as string);
+  console.log("DB CONNECTED");
+};
+
+const app: Application = express();
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cors());
+app.use(helmet());
+app.use(morgan("dev"));
+
+app.get("/", (req: Request, res: Response) => {
+  return res.json({ message: "Welcome To My portfolio API" });
+});
+
+const server = app.listen(process.env.PORT_TEST, () => {
+  console.log(`The Server is connected on ${process.env.PORT_TEST}`);
+});
+
+export { app, server };
+
+
+
+
+
+
+testing.test.ts
+
+
+
+import supertest from "supertest";
+import { app, server, connectToDatabase } from "./index.test";
+
+const request = supertest(app);
+
+describe("GET /", () => {
+  beforeAll(async () => {
+    await connectToDatabase(); 
+  });
+
+  afterAll((done) => {
+    server.close(done);
+  });
+
+  it("responds with JSON message", async () => {
+    const response = await request.get("/");
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ message: "Welcome To My portfolio API" });
+  });
+});
+
+
+
+jest.config.ts
+
+/**
+ * For a detailed explanation regarding each configuration property, visit:
+ * https://jestjs.io/docs/configuration
+ */
+export default {
+    clearMocks: true,
+    collectCoverage: true,
+    coverageDirectory: "coverage",
+    coverageProvider: "v8",
+    transform: {
+      "^.+\\.ts$": "ts-jest",
+    },
+    moduleNameMapper: {},
+    testEnvironment: "node",
+    extensionsToTreatAsEsm: [".ts"],
+    globals: {
+      "ts-jest": {
+        useESM: true,
+      },
+    },
+    testTimeout: 20000,
+  };
+  
+
+
+
+    "test": "jest  ./src/test/testing.test.ts --detectOpenHandles",
+    "coveralls": "jest ./src/tests/testing.test.ts --coverage  --detectOpenHandles && cat ./coverage/lcov.info | coveralls"
