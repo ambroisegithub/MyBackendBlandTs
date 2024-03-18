@@ -3,10 +3,9 @@ import morgan from "morgan";
 import express, { Application, Request, Response } from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-
 import cors from "cors";
 import helmet from "helmet";
-
+import userRoutes from "../Routes/UserRoute";
 dotenv.config();
 
 mongoose.set("strictQuery", false);
@@ -24,7 +23,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
-
+app.use('/api/user', userRoutes);
 app.get("/", (req: Request, res: Response) => {
   return res.json({ message: "Welcome To My portfolio API" });
 });
