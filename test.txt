@@ -1,0 +1,225 @@
+import supertest from "supertest";
+import { app, server, connectToDatabase } from "./index.test";
+import { User } from "../Models/UserModel";
+import bcrypt from "bcryptjs";
+
+const request = supertest(app);
+beforeAll(async () => {
+  await connectToDatabase();
+});
+
+// Delete all data from the database
+afterAll(async () => {
+  await User.deleteMany({});
+  server.close();
+});
+
+describe("User Signup", () => {
+  // Test for createUser function
+  it("creates a new user with valid data", async () => {
+    // Test data
+    const userData = {
+      fullName: "John Doe",
+      email: "johndoe@example.com",
+      gender: "male",
+      password: "password123",
+      confirmPassword: "password123",
+      userRole: "user",
+    };
+
+    // Make a request to create user
+    const response = await request.post("/api/user/signup").send(userData);
+
+    // Assertions
+    expect(response.status).toBe(201);
+    expect(response.body).toHaveProperty("token");
+    expect(response.body).toHaveProperty("user");
+    expect(response.body.message).toBe("User successfully added");
+  });
+
+  // Test for createUser function with invalid data
+  it("returns 400 with error message for invalid user data", async () => {
+    // Invalid test data
+    const invalidUserData = {
+      fullName: "John Doe",
+      email: "invalidemail",
+      gender: "male",
+      password: "pass",
+      confirmPassword: "pass",
+    };
+
+    // Make a request to create user with invalid data
+    const response = await request
+      .post("/api/user/signup")
+      .send(invalidUserData);
+
+    // Assertions
+    expect(response.status).toBe(400);
+    expect(response.text).toContain("must be a valid email");
+  });
+
+  // Test for createUser function with existing user
+  it("returns 409 with error message for existing user", async () => {
+    // Existing user test data
+    const existingUserData = {
+      fullName: "Existing User",
+      email: "johndoe@example.com",
+      gender: "female",
+      password: "password123",
+      confirmPassword: "password123",
+    };
+
+    // Make a request to create existing user
+    const response = await request
+      .post("/api/user/signup")
+      .send(existingUserData);
+
+    // Assertions
+    expect(response.status).toBe(409);
+    expect(response.body.message).toBe("This user already exists");
+  });
+
+  // Test for getAllUsers function
+  it("gets all users", async () => {
+    // Make a request to get all users
+    const response = await request.get("/api/user/all");
+
+    // Assertions
+    expect(response.status).toBe(200);
+    expect(response.body.data).toBeInstanceOf(Array);
+  });
+
+  // Test for getUserById function
+  it("gets single user by ID", async () => {
+    // Assuming there is a user created in the database already
+    const existingUser = await User.findOne({});
+    if (!existingUser) {
+      throw new Error("No user found in the database");
+    }
+
+    // Make a request to get user by ID
+    const response = await request.get(`/api/user/${existingUser._id}`);
+
+    // Assertions
+    expect(response.status).toBe(200);
+    expect(response.body.data).toHaveProperty("fullName", existingUser.fullName);
+    expect(response.body.data).toHaveProperty("email", existingUser.email);
+    expect(response.body.data).toHaveProperty("gender", existingUser.gender);
+    expect(response.body.data).toHaveProperty("userRole", existingUser.userRole);
+  });
+
+  // Test for updateUser function
+  it("updates user data", async () => {
+    // Assuming there is a user created in the database already
+    const existingUser = await User.findOne({});
+    if (!existingUser) {
+      throw new Error("No user found in the database");
+    }
+
+    // Updated data
+    const updatedData = {
+      fullName: "Updated Name",
+      email: "updatedemail@example.com",
+      gender: "other",
+      password: "newpassword123",
+      confirmPassword: "newpassword123",
+      userRole: "admin",
+    };
+
+    // Make a request to update user
+    const response = await request
+      .put(`/api/user/${existingUser._id}`)
+      .send(updatedData);
+
+    // Assertions
+    expect(response.status).toBe(200);
+    expect(response.body.data).toHaveProperty("fullName", updatedData.fullName);
+    expect(response.body.data).toHaveProperty("email", updatedData.email);
+    expect(response.body.data).toHaveProperty("gender", updatedData.gender);
+    expect(response.body.data).toHaveProperty("userRole", updatedData.userRole);
+  });
+
+  // Test for deleteUser function
+  it("deletes user", async () => {
+    // Assuming there is a user created in the database already
+    const existingUser = await User.findOne({});
+    if (!existingUser) {
+      throw new Error("No user found in the database");
+    }
+
+    // Make a request to delete user
+    const response = await request.delete(`/api/user/${existingUser._id}`);
+
+    // Assertions
+    expect(response.status).toBe(204);
+
+    // Verify if the user was actually deleted from the database
+    const deletedUser = await User.findById(existingUser._id);
+    expect(deletedUser).toBeNull();
+  });
+
+  // Test for loginUser function
+  it("should log in a user", async () => {
+    // Create a user first
+    const userData = {
+      fullName: "John Doe",
+      email: "johndoe@example.com",
+      gender: "male",
+      password: "password123",
+      confirmPassword: "password123",
+      userRole: "user",
+    };
+
+    await request.post("/api/user/signup").send(userData);
+
+    // Make a request to login
+    const res = await request.post("/api/user/login").send({
+      email: "johndoe@example.com",
+      password: "password123"
+    });
+
+    // Assertions
+    expect(res.status).toEqual(200); 
+    expect(res.body).toHaveProperty("message", "Login successful");
+    expect(res.body).toHaveProperty("token");
+  });
+
+  // Test for invalid credentials
+  it("should return 401 for Invalid credentials", async () => {
+    // Make a request with invalid password
+    const res = await request.post("/api/user/login").send({
+      email: "johndoe@example.com",
+      password: "invalid"
+    });
+
+    // Assertions
+    expect(res.status).toEqual(401);
+    expect(res.body).toHaveProperty("message", "Invalid credentials");
+  });
+
+  // Test for email not found
+  it("should return 404 when an email not found", async () => {
+    // Make a request with non-existing email
+    const res = await request.post("/api/user/login").send({
+      email: "invalid@test.com",
+      password: "password"
+    });
+
+    // Assertions
+    expect(res.status).toEqual(404);
+    expect(res.body).toHaveProperty("message", "User not found");
+  });
+
+  // Test for password does not match
+  it("should return 404 when a password does not match", async () => {
+    // Make a request with wrong password
+    const res = await request.post("/api/user/login").send({
+      email: "johndoe@example.com",
+      password: "wrongpassword"
+    });
+
+    // Assertions
+    expect(res.status).toEqual(401);
+    expect(res.body).toHaveProperty("message", "Invalid credentials");
+  });
+});
