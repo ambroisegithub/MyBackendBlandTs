@@ -26,12 +26,19 @@ This is a TypeScript backend API built with Express.js. It provides endpoints fo
 Before running the application, make sure to set up the necessary environment variables. Create a `.env` file in the root directory and define the following variables:
 
 MONGODB_URL=<Your Url>
+
 PORT=9999
+
 CLOUDINARYNAME=<Your Cloud_name>
+
 APIKEY=<.....>
+
 APISECRET=<.....>
+
 JWT_SECRET=<......>
+
 MONGODB_URL_TEST=<.....>
+
 PORT_TEST=7777
 
 
