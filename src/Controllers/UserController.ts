@@ -2,11 +2,10 @@ import { Request, Response } from 'express';
 import { User, validateUserModelData } from '../Models/UserModel'; 
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import {Blacklist} from '../Models/BlacklistModel';
 class UserController {
   // CREATE User (Signup)
   static async createUser(req: Request, res: Response) {
-    try {
+  
         const { error } = validateUserModelData(req.body);
         if (error) {
             return res.status(400).send(error.details[0].message);
@@ -41,29 +40,23 @@ class UserController {
             user: savedUser,
             message: 'User successfully added',
         });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: 'Internal Server Error' });
-    }
+ 
 }
 
 
   // READ All Users
   static async getAllUsers(req: Request, res: Response) {
-    try {
+  
       const users = await User.find();
       return res.status(200).json({
         data: users,
       });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Internal Server Error' });
-    }
+
   }
 
   // READ Single User
   static async getUserById(req: Request, res: Response) {
-    try {
+ 
       const user = await User.findById(req.params.id);
       if (user) {
         return res.status(200).json({
@@ -72,16 +65,13 @@ class UserController {
       } else {
         return res.status(404).json({ message: 'User not found' });
       }
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Internal Server Error' });
-    }
+
   }
   
 // update user
 
 static async updateUser(req: Request, res: Response) {
-    try {
+   
         const { error } = validateUserModelData(req.body);
         if (error) {
             return res.status(400).send(error.details[0].message);
@@ -90,12 +80,14 @@ static async updateUser(req: Request, res: Response) {
         const userId = req.params.id;
         const user = await User.findById(userId);
 
+
         if (!user) {
             return res.status(404).json({
                 message: 'User not found',
             });
         }
 
+        
         const { fullName, email, gender, password, userRole } = req.body;
 
         // Check if the password is provided, then hash it
@@ -117,15 +109,12 @@ static async updateUser(req: Request, res: Response) {
             data: updatedUser,
             message: 'User successfully updated',
         });
-    } catch (error) {
-        console.error(error);
-        return res.status(500).json({ error: 'Internal Server Error' });
-    }
+ 
 }
 
   // DELETE User
   static async deleteUser(req: Request, res: Response) {
-    try {
+
       const userId = req.params.id;
       const user = await User.findById(userId);
 
@@ -139,17 +128,14 @@ static async updateUser(req: Request, res: Response) {
       return res.status(204).json({
         message: 'User deleted successfully',
       });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Internal Server Error' });
-    }
+
   }
 
 
 // user Login 
 
   static async loginUser(req: Request, res: Response) {
-    try {
+
       const { email, password } = req.body;
 
       const user = await User.findOne({ email });
@@ -177,39 +163,9 @@ static async updateUser(req: Request, res: Response) {
         user,
         message: 'Login successful',
       });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ error: 'Internal Server Error' });
-    }
+ 
   }
-  
-  static async logout(req: Request, res: Response) {
-    try {
-      const authHeader = req.headers['cookie']; // get the session cookie from request header
-      if (!authHeader) return res.sendStatus(204); // No content
 
-      const cookie = authHeader.split('=')[1]; // If there is, split the cookie string to get the actual jwt token
-      const accessToken = cookie.split(';')[0];
-
-      const checkIfBlacklisted = await Blacklist.findOne({ token: accessToken }); // Check if that token is blacklisted
-      if (checkIfBlacklisted) return res.sendStatus(204); // if true, send a no content response.
-
-      // otherwise blacklist token
-      const newBlacklist = new Blacklist({
-        token: accessToken,
-      });
-      await newBlacklist.save();
-
-      // Also clear request cookie on client
-      res.setHeader('Clear-Site-Data', '"cookies"');
-      res.status(200).json({ message: 'You are logged out!' });
-    } catch (err) {
-      res.status(500).json({
-        status: 'error',
-        message: 'Internal Server Error',
-      });
-    }
-  }
 }
 
 export default UserController;
