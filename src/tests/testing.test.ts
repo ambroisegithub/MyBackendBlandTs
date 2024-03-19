@@ -505,6 +505,100 @@ it("returns 404 when attempting to delete non-existing user", async () => {
     });
 
 
+    it("should return 200 when updating an existing blog with valid data including a new image", async () => {
+      // Prepare the update data
+      const updateData = {
+         blogTitle: "Updated Title",
+         blogDescription: "Updated Description",
+         blogDate: new Date().toISOString(),
+      };
+     
+      // Ensure the file exists at the specified path
+      const filePath = path.join(__dirname, "update.jpeg");
+      if (!fs.existsSync(filePath)) {
+         throw new Error("Test image file not found");
+      }
+     
+      // Perform the request with the file attached
+      const response = await request
+         .put(`/api/blog/update-blog/${existingBlog._id}`)
+         .set("Authorization", `${adminToken}`)
+         .field("blogTitle", updateData.blogTitle)
+         .field("blogDescription", updateData.blogDescription)
+         .field("blogDate", updateData.blogDate)
+         .attach("blogImage", filePath);
+     
+      // Assertions
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty("message", "Blog successfully updated");
+      expect(response.body.data).toHaveProperty("blogTitle", updateData.blogTitle);
+      expect(response.body.data).toHaveProperty("blogDescription", updateData.blogDescription);
+      expect(response.body.data).toHaveProperty("blogDate", updateData.blogDate);
+      // Assuming the updated blog image URL is returned in the response
+      expect(response.body.data).toHaveProperty("blogImage");
+      expect(response.body.data.blogImage).toBeDefined();
+      expect(response.body.data.blogImage).toMatch(/^https:\/\/res\.cloudinary\.com\/[^\/]+\/image\/upload\//);
+     });
+     
+     
+     
+     
+     it("should return 404 when updating a non-existent blog", async () => {
+      const nonExistentBlogId = "609df8e15715ab2374e0e29f"; // Use a non-existent ID
+      const updateData = {
+         blogTitle: "Updated Title",
+         blogDescription: "Updated Description",
+         blogDate: new Date().toISOString(),
+      };
+     
+      const response = await request
+         .put(`/api/blog/update-blog/${nonExistentBlogId}`)
+         .set("Authorization", `${adminToken}`)
+         .send(updateData);
+     
+      expect(response.status).toBe(404);
+      expect(response.body).toHaveProperty("message", "Blog not found");
+     });
+     
+     
+     it("should return 500 for internal server error during blog update", async () => {
+      jest.spyOn(console, "error").mockImplementation(() => {}); // Suppress console.error output
+      jest.spyOn(Blog, "findByIdAndUpdate").mockRejectedValue(new Error("Internal Server Error"));
+     
+      const updateData = {
+         blogTitle: "Updated Title",
+         blogDescription: "Updated Description",
+         blogDate: new Date().toISOString(),
+      };
+     
+      const response = await request
+         .put(`/api/blog/update-blog/${existingBlog._id}`)
+         .set("Authorization", `${adminToken}`)
+         .send(updateData);
+     
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty("error", "Internal Server Error");
+     });
+     
+     
+      
+     it("should return 404 when updating a non-existent blog", async () => {
+       const nonExistentBlogId = "609df8e15715ab2374e0e29f"; // Use a non-existent ID
+       const updateData = {
+          blogTitle: "Updated Title",
+          blogDescription: "Updated Description",
+          blogDate: new Date().toISOString(),
+       };
+      
+       const response = await request
+          .put(`/api/blog/update-blog/${nonExistentBlogId}`)
+          .set("Authorization", `${adminToken}`)
+          .send(updateData);
+      
+       expect(response.status).toBe(404);
+       expect(response.body).toHaveProperty("message", "Blog not found");
+      });
+
     // Test for getting all blogs
 it("should retrieve all blogs and return success", async () => {
   const response = await request.get("/api/blog/getall-blog");
@@ -605,23 +699,9 @@ it("should return 500 for internal server error", async () => {
   expect(response.body).toHaveProperty("error", "Internal Server Error");
 });
 
- 
-it("should return 404 when updating a non-existent blog", async () => {
-  const nonExistentBlogId = "609df8e15715ab2374e0e29f"; // Use a non-existent ID
-  const updateData = {
-     blogTitle: "Updated Title",
-     blogDescription: "Updated Description",
-     blogDate: new Date().toISOString(),
-  };
- 
-  const response = await request
-     .put(`/api/blog/update-blog/${nonExistentBlogId}`)
-     .set("Authorization", `${adminToken}`)
-     .send(updateData);
- 
-  expect(response.status).toBe(404);
-  expect(response.body).toHaveProperty("message", "Blog not found");
- });
+
+
+
 
  
  it("should return 404 when retrieving a non-existent blog", async () => {
