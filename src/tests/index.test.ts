@@ -6,7 +6,6 @@ import dotenv from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
 import userRoutes from "../Routes/UserRoute";
-import blogRoutes from "../Routes/BlogRoute";
 dotenv.config();
 import blogRoutes from "../Routes/BlogRoute";
 mongoose.set("strictQuery", false);
