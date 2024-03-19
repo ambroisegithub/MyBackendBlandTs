@@ -7,7 +7,6 @@
     "start:dev": "nodemon  ./index.ts",
     "test": "jest  ./src/tests/testing.test.ts --detectOpenHandles",
     "coveralls": "jest ./src/tests/testing.test.ts --coverage  --detectOpenHandles && cat ./coverage/lcov.info | coveralls"
-
   },
   "author": "",
   "license": "ISC",
@@ -48,6 +47,7 @@
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "nodemon": "^3.1.0",
+    "path": "^0.12.7",
     "test-jest": "^1.0.1"
   }
 }
