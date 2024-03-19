@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import helmet from "helmet";
 import userRoutes from "../Routes/UserRoute";
+import blogRoutes from "../Routes/BlogRoute";
 dotenv.config();
 
 mongoose.set("strictQuery", false);
@@ -24,6 +25,8 @@ app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
 app.use('/api/user', userRoutes);
+app.use('/api/blog', blogRoutes);
+
 app.get("/", (req: Request, res: Response) => {
   return res.json({ message: "Welcome To My portfolio API" });
 });
