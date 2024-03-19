@@ -5,6 +5,8 @@ import bcrypt from "bcryptjs";
 
 const request = supertest(app);
 import { Authorization } from "../Middlewares/Authorization";
+import path from "path";
+import { Blog } from "../Models/BlogModel";
 import jwt from "jsonwebtoken";
 import path from "path";
 import fs from 'fs';
@@ -305,5 +307,139 @@ it("returns 404 when attempting to delete non-existing user", async () => {
   })
   
 
+
+  describe("Authorization Middleware", () => {
+    let token: string;
+  
+    beforeEach(() => {
+      const mockUser = new User({
+        email: "test@test.com",
+        fullName: "Test User",
+        password: "password123",
+        userRole: "admin",
+      });
+      token = jwt.sign({ id: mockUser._id }, process.env.JWT_SECRET || "");
+    });
+  
+
+    it("should return 401 for non-admin user", async () => {
+      // Change the user role to 'user' to simulate non-admin user
+      const mockUser = new User({
+        email: "test@test.com",
+        fullName: "Test User",
+        password: "password123",
+        userRole: "user",
+      });
+      const token = jwt.sign({ id: mockUser._id }, process.env.JWT_SECRET || "");
+  
+      const req: any = {
+        headers: {
+          authorization: token,
+        },
+      };
+      const res: any = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
+      const next = jest.fn();
+  
+      await Authorization(req, res, next);
+  
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "This action is permitted only for admins.",
+      });
+      expect(next).not.toHaveBeenCalled();
+    });
+  
+
+  
+    it("should return 401 for expired token", async () => {
+      const expiredToken = jwt.sign(
+        { id: "mockusers._id" },
+        process.env.JWT_SECRET || "",
+        { expiresIn: 0 }
+      );
+      const req: any = {
+        headers: {
+          authorization: expiredToken,
+        },
+      };
+      const res: any = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
+      const next = jest.fn();
+  
+      await Authorization(req, res, next);
+  
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Check if your token is valid.",
+      });
+      expect(next).not.toHaveBeenCalled();
+    });
+  });
+  
+  describe("User Middleware", () => {
+    let token: string;
+  
+    beforeEach(() => {
+      const mockUser = new User({
+        email: "test@test.com",
+        fullName: "Test User",
+        password: "password123",
+        userRole: "user",
+      });
+      token = jwt.sign({ id: mockUser._id }, process.env.JWT_SECRET || "");
+    });
+  
+    it("should return 401 for invalid token", async () => {
+      const req: any = {
+        headers: {
+          authorization: "invalidToken",
+        },
+      };
+      const res: any = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
+      const next = jest.fn();
+  
+      await UserMiddleware(req, res, next);
+  
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Invalid token",
+      });
+      expect(next).not.toHaveBeenCalled();
+    });
+  
+    it("should return 401 for expired token", async () => {
+      const expiredToken = jwt.sign(
+        { id: "mockusers._id" },
+        process.env.JWT_SECRET || "",
+        { expiresIn: 0 }
+      );
+      const req: any = {
+        headers: {
+          authorization: expiredToken,
+        },
+      };
+      const res: any = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
+      const next = jest.fn();
+  
+      await UserMiddleware(req, res, next);
+  
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Token expired",
+      });
+      expect(next).not.toHaveBeenCalled();
+    });
+  });
 
 
