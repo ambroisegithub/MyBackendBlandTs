@@ -2,7 +2,11 @@ import supertest from "supertest";
 import { app, server, connectToDatabase } from "./index.test";
 import { User } from "../Models/UserModel";
 import bcrypt from "bcryptjs";
-
+import UserMiddleware from "../Middlewares/UserMiddleware";
+import { Authorization } from "../Middlewares/Authorization";
+import path from "path";
+import { Blog } from "../Models/BlogModel";
+import jwt from "jsonwebtoken";
 const request = supertest(app);
 beforeAll(async () => {
   await connectToDatabase();
@@ -11,6 +15,7 @@ beforeAll(async () => {
 // Delete all data from the database
 afterAll(async () => {
   await User.deleteMany({});
+  await Blog.deleteMany({});
   server.close();
 });
 describe("User Signup", () => {
@@ -18,8 +23,8 @@ describe("User Signup", () => {
 
   it("creates a new user with valid data", async () => {
     const userData = {
-      fullName: "John Doe",
-      email: "johndoe@example.com",
+      fullName: "Ambroise Muhayimana",
+      email: "ambroise@muhayimana.com",
       gender: "male",
       password: "password123",
       confirmPassword: "password123",
@@ -51,7 +56,7 @@ describe("User Signup", () => {
 
   it("returns 400 with error message for invalid user data", async () => {
     const invalidUserData = {
-      fullName: "John Doe",
+      fullName: "Ambroise Muhayimana",
       email: "invalidemail",
       gender: "male",
       password: "pass",
@@ -69,7 +74,7 @@ describe("User Signup", () => {
   it("returns 409 with error message for existing user", async () => {
     const existingUserData = {
       fullName: "Existing User",
-      email: "johndoe@example.com",
+      email: "ambroise@muhayimana.com",
       gender: "female",
       password: "password123",
       confirmPassword: "password123",
@@ -211,17 +216,7 @@ it("returns 404 when updating non-existing user", async () => {
   expect(response.body).toHaveProperty("message", "User not found");
 });
 
-// it("returns 404 when user is not found", async () => {
-//   // Generate a random non-existing user ID
-//   const nonExistingUserId = "609df8e15715ab2374e0e29f";
 
-//   // Make a request to get user by non-existing ID
-//   const response = await request.get(`/api/user/${nonExistingUserId}`);
-
-//   // Assertions
-//   expect(response.status).toBe(404);
-//   expect(response.body).toHaveProperty("message", "User not found");
-// });
 
 it("deletes user", async () => {
   // Assuming there is a user created in the database already
@@ -250,12 +245,12 @@ it("returns 404 when attempting to delete non-existing user", async () => {
   expect(response.body).toHaveProperty("message", "User not found");
 });
     let token:string;
-    // const existingUser = await User.findOne({ email: "johndoe@example.com" });
+    
     it("should log in a user", async () => {
     // Create a user first
     const userData = {
-      fullName: "John Doe",
-      email: "johndoe@example.com",
+      fullName: "Ambroise Muhayimana",
+      email: "ambroise@muhayimana.com",
       gender: "male",
       password: "password123",
       confirmPassword: "password123",
@@ -265,7 +260,8 @@ it("returns 404 when attempting to delete non-existing user", async () => {
     await request.post("/api/user/signup").send(userData);
 
     const res = await request.post("/api/user/login").send({
-      email: "johndoe@example.com",
+   
+      email: "ambroise@muhayimana.com",
       password: "password123"
     });
     console.log("Login Response:", res.body);
@@ -277,13 +273,14 @@ it("returns 404 when attempting to delete non-existing user", async () => {
     
     it("should return 401 for Invalid credentials", async () => {
       const res = await request.post("/api/user/login").send({
-        email: "johndoe@example.com",
-        password: "invalid"
+      email: "ambroise@muhayimana.com",
+      password: "invalid"
       });
       console.log("Invalid Credentials Response:", res.body);
       expect(res.status).toEqual(401);
       expect(res.body).toHaveProperty("message", "Invalid credentials");
     });
+    
     
     it("should return 404 when an email not found", async () => {
       const res = await request.post("/api/user/login").send({
@@ -297,8 +294,8 @@ it("returns 404 when attempting to delete non-existing user", async () => {
     
     it("should return 404 when a password does not match", async () => {
       const res = await request.post("/api/user/login").send({
-        email: "johndoe@example.com",
-        password: "wrongpassword"
+      email: "ambroise@muhayimana.com",
+      password: "wrongpassword"
       });
       console.log("Password Does Not Match Response:", res.body);
       expect(res.status).toEqual(401);
@@ -308,6 +305,140 @@ it("returns 404 when attempting to delete non-existing user", async () => {
     
   })
   
+  
 
+  describe("Authorization Middleware", () => {
+    let token: string;
+  
+    beforeEach(() => {
+      const mockUser = new User({
+        email: "test@test.com",
+        fullName: "Test User",
+        password: "password123",
+        userRole: "admin",
+      });
+      token = jwt.sign({ id: mockUser._id }, process.env.JWT_SECRET || "");
+    });
+  
+
+    it("should return 401 for non-admin user", async () => {
+      // Change the user role to 'user' to simulate non-admin user
+      const mockUser = new User({
+        email: "test@test.com",
+        fullName: "Test User",
+        password: "password123",
+        userRole: "user",
+      });
+      const token = jwt.sign({ id: mockUser._id }, process.env.JWT_SECRET || "");
+  
+      const req: any = {
+        headers: {
+          authorization: token,
+        },
+      };
+      const res: any = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
+      const next = jest.fn();
+  
+      await Authorization(req, res, next);
+  
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "This action is permitted only for admins.",
+      });
+      expect(next).not.toHaveBeenCalled();
+    });
+  
+
+  
+    it("should return 401 for expired token", async () => {
+      const expiredToken = jwt.sign(
+        { id: "mockusers._id" },
+        process.env.JWT_SECRET || "",
+        { expiresIn: 0 }
+      );
+      const req: any = {
+        headers: {
+          authorization: expiredToken,
+        },
+      };
+      const res: any = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
+      const next = jest.fn();
+  
+      await Authorization(req, res, next);
+  
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Check if your token is valid.",
+      });
+      expect(next).not.toHaveBeenCalled();
+    });
+  });
+  
+  describe("User Middleware", () => {
+    let token: string;
+  
+    beforeEach(() => {
+      const mockUser = new User({
+        email: "test@test.com",
+        fullName: "Test User",
+        password: "password123",
+        userRole: "user",
+      });
+      token = jwt.sign({ id: mockUser._id }, process.env.JWT_SECRET || "");
+    });
+  
+    it("should return 401 for invalid token", async () => {
+      const req: any = {
+        headers: {
+          authorization: "invalidToken",
+        },
+      };
+      const res: any = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
+      const next = jest.fn();
+  
+      await UserMiddleware(req, res, next);
+  
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Invalid token",
+      });
+      expect(next).not.toHaveBeenCalled();
+    });
+  
+    it("should return 401 for expired token", async () => {
+      const expiredToken = jwt.sign(
+        { id: "mockusers._id" },
+        process.env.JWT_SECRET || "",
+        { expiresIn: 0 }
+      );
+      const req: any = {
+        headers: {
+          authorization: expiredToken,
+        },
+      };
+      const res: any = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn(),
+      };
+      const next = jest.fn();
+  
+      await UserMiddleware(req, res, next);
+  
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "Token expired",
+      });
+      expect(next).not.toHaveBeenCalled();
+    });
+  });
 
 
