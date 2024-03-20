@@ -28,10 +28,7 @@ const subscribeSchema = new Schema<ISubscribe>({
     },
 });
 
-// Joi validation for Mongoose model data
-export const validateSubscribeModelData = (data: ISubscribe) => {
-    return SubscribeSchemaValidate.validate(data);
-};
+
 
 // Creating a model
 export const Subscribe = model<ISubscribe>('Subscribe', subscribeSchema);

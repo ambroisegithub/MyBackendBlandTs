@@ -7,6 +7,9 @@ import { Authorization } from "../Middlewares/Authorization";
 import path from "path";
 import fs from "fs";
 import { Blog } from "../Models/BlogModel";
+import { ContactUs } from "../Models/contactUsmodels";
+import { Subscribe } from "../Models/subscribeModel";
+
 import jwt from "jsonwebtoken";
 const request = supertest(app);
 beforeAll(async () => {
@@ -17,8 +20,14 @@ beforeAll(async () => {
 afterAll(async () => {
   await User.deleteMany({});
   await Blog.deleteMany({});
+  await ContactUs.deleteMany({});
+  await Subscribe.deleteMany({});
+
   server.close();
 });
+
+  // ******************************************* User End Point Test******************
+
 describe("User Signup", () => {
 
 
@@ -307,6 +316,7 @@ it("returns 404 when attempting to delete non-existing user", async () => {
   })
   
   
+  // ******************************************* Authorization Middleware of Admin Test******************
 
   describe("Authorization Middleware", () => {
     let token: string;
@@ -442,6 +452,7 @@ it("returns 404 when attempting to delete non-existing user", async () => {
     });
   });
 
+  // ******************************************* Blog Api Test******************
 
   describe("Blog API Testing", () => {
     let adminToken:string;
@@ -539,7 +550,6 @@ it("returns 404 when attempting to delete non-existing user", async () => {
       expect(response.body.data.blogImage).toBeDefined();
       expect(response.body.data.blogImage).toMatch(/^https:\/\/res\.cloudinary\.com\/[^\/]+\/image\/upload\//);
      });
-     
      
      
      
@@ -700,9 +710,6 @@ it("should return 500 for internal server error", async () => {
 });
 
 
-
-
-
  
  it("should return 404 when retrieving a non-existent blog", async () => {
   const nonExistentBlogId = "609df8e15715ab2374e0e29f"; // Use a non-existent ID
@@ -758,4 +765,456 @@ it("should return 500 for internal server error during blog deletion", async () 
 });
  
   });
+
+
+
+  // ******************************************* Contact us End-Point Test******************
+
+
+  describe('Contact Us API', () => {
+    it('should create a new contact request with valid data', async () => {
+       const contactData = {
+        fullName: "Muhayimana Ambroise",
+        phoneNumber: "1234567890",
+        emailAddress: "muhayimana@ambroise.com",
+        subject: "Test Subject",
+        message: "This is a test message",
+       };
+   
+       const response = await request.post('/api/contactus/post-contact-us').send(contactData);
+   
+       expect(response.status).toBe(201);
+       expect(response.body).toHaveProperty('message', 'Contact request successfully created');
+       expect(response.body.data).toHaveProperty('fullName', contactData.fullName);
+       expect(response.body.data).toHaveProperty('phoneNumber', contactData.phoneNumber);
+       expect(response.body.data).toHaveProperty('emailAddress', contactData.emailAddress);
+       expect(response.body.data).toHaveProperty('subject', contactData.subject);
+       expect(response.body.data).toHaveProperty('message', contactData.message);
+    });
+   
+    it('should return 400 for invalid contact data', async () => {
+       const invalidContactData = {
+         fullName: "", // Invalid data
+         phoneNumber: "1234567890",
+         emailAddress: "muhayimana@ambroise.com",
+         subject: "Test Subject",
+         message: "This is a test message",
+       };
+   
+       const response = await request.post('/api/contactus/post-contact-us').send(invalidContactData);
+   
+       expect(response.status).toBe(400);
+       expect(response.text).toContain("\"fullName\" is not allowed to be empty");
+
+    });
+
+    it('should update an existing contact request with valid data', async () => {
+      // Assuming a contact request is already created in the database
+      const existingContact = await ContactUs.create({
+        fullName: "Muhayimana Ambroise",
+        phoneNumber: "1234567890",
+        emailAddress: "muhayimana@ambroise.com",
+        subject: "Test Subject",
+        message: "This is a test message",
+      });
+     
+      const updateData = {
+        fullName: "Shakur Ambroise",
+        phoneNumber: "0987654321",
+        emailAddress: "shakur@ambroise.com",
+        subject: "Updated Subject",
+        message: "This is an updated message",
+      };
+     
+      const response = await request.put(`/api/contactus/update-contact-us/${existingContact._id}`).send(updateData);
+     
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('message', 'Contact request successfully updated');
+      expect(response.body.data).toHaveProperty('fullName', updateData.fullName);
+      expect(response.body.data).toHaveProperty('phoneNumber', updateData.phoneNumber);
+      expect(response.body.data).toHaveProperty('emailAddress', updateData.emailAddress);
+      expect(response.body.data).toHaveProperty('subject', updateData.subject);
+      expect(response.body.data).toHaveProperty('message', updateData.message);
+
+      
+     });
+     
+     it('should return 404 for non-existent contact request', async () => {
+      const nonExistentId = "609df8e15715ab2374e0e29f"; // Use a non-existent ID
+      const updateData = {
+         fullName: "Shakur Ambroise",
+         phoneNumber: "0987654321",
+         emailAddress: "shakur@ambroise.com",
+         subject: "Updated Subject",
+         message: "This is an updated message",
+      };
+     
+      const response = await request.put(`/api/contactus/update-contact-us/${nonExistentId}`).send(updateData);
+     
+      expect(response.status).toBe(404);
+      expect(response.body).toHaveProperty('message', 'Contact request not found');
+     });
+
+     it('should retrieve all contact requests', async () => {
+      const response = await request.get('/api/contactus/getall-contact-us');
+     
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data).toBeInstanceOf(Array);
+     });
+     it('should retrieve a single contact request', async () => {
+      // Assuming a contact request is already created in the database
+      const existingContact = await ContactUs.create({
+        fullName: "Muhayimana Ambroise",
+        phoneNumber: "1234567890",
+        emailAddress: "muhayimana@ambroise.com",
+        subject: "Test Subject",
+        message: "This is a test message",
+      });
+     
+      const response = await request.get(`/api/contactus/getone-contact-us/${existingContact._id}`);
+     
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('fullName', existingContact.fullName);
+     });
+     
+     it('should return 404 for non-existent contact request', async () => {
+      const nonExistentId = "609df8e15715ab2374e0e29f"; // Use a non-existent ID
+     
+      const response = await request.get(`/api/contactus/getone-contact-us/${nonExistentId}`);
+     
+      expect(response.status).toBe(404);
+      expect(response.body).toHaveProperty('message', 'Contact request not found');
+     });
+
+     it('should delete a contact request', async () => {
+      // Assuming a contact request is already created in the database
+      const existingContact = await ContactUs.create({
+        fullName: "Muhayimana Ambroise",
+        phoneNumber: "1234567890",
+        emailAddress: "muhayimana@ambroise.com",
+        subject: "Test Subject",
+        message: "This is a test message",
+      });
+     
+      const response = await request.delete(`/api/contactus/delete-contact-us/${existingContact._id}`);
+     
+      expect(response.status).toBe(204);
+     });
+     
+     it('should return 404 for non-existent contact request', async () => {
+      const nonExistentId = "609df8e15715ab2374e0e29f"; // Use a non-existent ID
+     
+      const response = await request.delete(`/api/contactus/delete-contact-us/${nonExistentId}`);
+     
+      expect(response.status).toBe(404);
+      expect(response.body).toHaveProperty('message', 'Contact request not found');
+     });
+
+     
+    //  it('should return 500 for internal server error during contact request creation', async () => {
+    //   jest.spyOn(ContactUs.prototype, 'save').mockRejectedValue(new Error('Internal Server Error'));
+     
+    //   const contactData = {
+    //      fullName: "Muhayimana Ambroise",
+    //      phoneNumber: "1234567890",
+    //      emailAddress: "muhayimana@ambroise.com",
+    //      subject: "Test Subject",
+    //      message: "This is a test message",
+    //   };
+     
+    //   const response = await request.post('/api/contactus/post-contact-us').send(contactData);
+     
+    //   expect(response.status).toBe(500);
+    //   expect(response.body).toHaveProperty('error', 'Internal Server Error');
+    //  });
+     
+     
+   });
+
+   describe('Contact Us API Error Handling', () => {
+    it('should return 500 for internal server error during contact request creation', async () => {
+       jest.spyOn(ContactUs.prototype, 'save').mockRejectedValue(new Error('Internal Server Error'));
+   
+       const contactData = {
+         fullName: "Muhayimana Ambroise",
+         phoneNumber: "1234567890",
+         emailAddress: "muhayimana@ambroise.com",
+         subject: "Test Subject",
+         message: "This is a test message",
+       };
+   
+       const response = await request.post('/api/contactus/post-contact-us').send(contactData);
+   
+       expect(response.status).toBe(500);
+       expect(response.body).toHaveProperty('error', 'Internal Server Error');
+    });
+   
+    it('should return 500 for internal server error during contact request update', async () => {
+       jest.spyOn(ContactUs, 'findByIdAndUpdate').mockRejectedValue(new Error('Internal Server Error'));
+   
+       const existingContact = await ContactUs.create({
+         fullName: "Muhayimana Ambroise",
+         phoneNumber: "1234567890",
+         emailAddress: "muhayimana@ambroise.com",
+         subject: "Test Subject",
+         message: "This is a test message",
+       });
+   
+       const updateData = {
+         fullName: "Shakur Ambroise",
+         phoneNumber: "0987654321",
+         emailAddress: "shakur@ambroise.com",
+         subject: "Updated Subject",
+         message: "This is an updated message",
+       };
+   
+       const response = await request.put(`/api/contactus/update-contact-us/${existingContact._id}`).send(updateData);
+   
+       expect(response.status).toBe(500);
+       expect(response.body).toHaveProperty('error', 'Internal Server Error');
+    });
+   
+    it('should return 500 for internal server error during contact request deletion', async () => {
+       jest.spyOn(ContactUs, 'findByIdAndDelete').mockRejectedValue(new Error('Internal Server Error'));
+   
+       const existingContact = await ContactUs.create({
+         fullName: "Muhayimana Ambroise",
+         phoneNumber: "1234567890",
+         emailAddress: "muhayimana@ambroise.com",
+         subject: "Test Subject",
+         message: "This is a test message",
+       });
+   
+       const response = await request.delete(`/api/contactus/delete-contact-us/${existingContact._id}`);
+   
+       expect(response.status).toBe(500);
+       expect(response.body).toHaveProperty('error', 'Internal Server Error');
+    });
+   
+    it('should return 500 for internal server error during retrieving a single contact request', async () => {
+       jest.spyOn(ContactUs, 'findById').mockRejectedValue(new Error('Internal Server Error'));
+   
+       const existingContact = await ContactUs.create({
+         fullName: "Muhayimana Ambroise",
+         phoneNumber: "1234567890",
+         emailAddress: "muhayimana@ambroise.com",
+         subject: "Test Subject",
+         message: "This is a test message",
+       });
+   
+       const response = await request.get(`/api/contactus/getone-contact-us/${existingContact._id}`);
+   
+       expect(response.status).toBe(500);
+       expect(response.body).toHaveProperty('error', 'Internal Server Error');
+    });
+   
+    it('should return 500 for internal server error during retrieving all contact requests', async () => {
+       jest.spyOn(ContactUs, 'find').mockRejectedValue(new Error('Internal Server Error'));
+   
+       const response = await request.get('/api/contactus/getall-contact-us');
+   
+       expect(response.status).toBe(500);
+       expect(response.body).toHaveProperty('error', 'Internal Server Error');
+    });
+   });
+
+
+
+  //  ***************************Subscribe End Point Test********************************
+
+
+
+  describe('Subscribe API', () => {
+ 
+    beforeEach(async () => {
+      // Clean up the database before each test
+      await Subscribe.deleteMany({});
+   });
+
+   // Existing tests...
+
+
+   
+    it('should create a new subscription with valid data', async () => {
+       const subscribeData = {
+        email: "seambroi4@gmail.com",
+        date: new Date(),
+       };
+   
+       const response = await request.post('/api/subscribe/post-subscribe').send(subscribeData);
+   
+       expect(response.status).toBe(201);
+       expect(response.body).toHaveProperty('message', 'Subscription successfully created');
+       expect(response.body.data).toHaveProperty('email', subscribeData.email);
+     
+    });
+   
+
+
+    it('should return 409 for email already subscribed', async () => {
+       const existingSubscribe = await Subscribe.create({
+        email: "seambroi4@gmail.com",
+         date: new Date(),
+       });
+   
+       const subscribeData = {
+         email: existingSubscribe.email,
+         date: new Date(),
+       };
+   
+       const response = await request.post('/api/subscribe/post-subscribe').send(subscribeData);
+   
+       expect(response.status).toBe(409);
+       expect(response.body).toHaveProperty('message', 'Email is already subscribed');
+    });
+   
+    it('should return 500 for internal server error during subscription creation', async () => {
+       jest.spyOn(Subscribe.prototype, 'save').mockRejectedValue(new Error('Internal Server Error'));
+   
+       const subscribeData = {
+        email: "seambroi4@gmail.com",
+         date: new Date(),
+       };
+   
+       const response = await request.post('/api/subscribe/post-subscribe').send(subscribeData);
+   
+       expect(response.status).toBe(500);
+       expect(response.body).toHaveProperty('error', 'Internal Server Error');
+    });
+
+
+
+
+    it('should update an existing subscription with valid data', async () => {
+      // Assuming a subscription is already created in the database
+      const existingSubscribe = await Subscribe.create({
+        email: "seambroi4@gmail.com",
+         date: new Date(),
+      });
+     
+      const updateData = {
+         email: "updated@example.com",
+         date: new Date(),
+      };
+     
+      const response = await request.put(`/api/subscribe/update-subscribe/${existingSubscribe._id}`).send(updateData);
+     
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('message', 'Subscription successfully updated');
+      expect(response.body.data).toHaveProperty('email', updateData.email);
+     });
+     
+     it('should return 404 for non-existent subscription', async () => {
+      const nonExistentId = "609df8e15715ab2374e0e29f"; // Use a non-existent ID
+      const updateData = {
+         email: "updated@example.com",
+         date: new Date(),
+      };
+     
+      const response = await request.put(`/api/subscribe/update-subscribe/${nonExistentId}`).send(updateData);
+     
+      expect(response.status).toBe(404);
+      expect(response.body).toHaveProperty('message', 'Subscription not found');
+     });
+     
+     it('should return 500 for internal server error during subscription update', async () => {
+      jest.spyOn(Subscribe, 'findByIdAndUpdate').mockRejectedValue(new Error('Internal Server Error'));
+     
+      const existingSubscribe = await Subscribe.create({
+        email: "seambroi4@gmail.com",
+         date: new Date(),
+      });
+     
+      const updateData = {
+         email: "updated@example.com",
+         date: new Date(),
+      };
+     
+      const response = await request.put(`/api/subscribe/update-subscribe/${existingSubscribe._id}`).send(updateData);
+     
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty('error', 'Internal Server Error');
+     });
+
+
+
+     it('should retrieve all subscriptions', async () => {
+      const response = await request.get('/api/subscribe/getall-subscribe');
+     
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data).toBeInstanceOf(Array);
+     });
+     
+     it('should return 500 for internal server error during retrieving all subscriptions', async () => {
+      jest.spyOn(Subscribe, 'find').mockRejectedValue(new Error('Internal Server Error'));
+     
+      const response = await request.get('/api/subscribe/getall-subscribe');
+     
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty('error', 'Internal Server Error');
+     });
+
+     
+     it('should retrieve a single subscription', async () => {
+      // Assuming a subscription is already created in the database
+      const existingSubscribe = await Subscribe.create({
+        email: "seambroi4@gmail.com",
+         date: new Date(),
+      });
+     
+      const response = await request.get(`/api/subscribe/getone-subscribe/${existingSubscribe._id}`);
+     
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('email', existingSubscribe.email);
+     });
+     
+     it('should delete a subscribe request', async () => {
+      // Assuming a subscribe request is already created in the database
+      const existingSubscribe = await Subscribe.create({
+        email: "seambroi4@gmail.com",
+        date: new Date(),
+      });
+     
+      const response = await request.delete(`/api/subscribe/delete-subscribe/${existingSubscribe._id}`);
+     
+      expect(response.status).toBe(204);
+     });
+
+     it('should return 404 for non-existent subscription', async () => {
+      const nonExistentId = "609df8e15715ab2374e0e29f"; // Use a non-existent ID
+     
+      const response = await request.get(`/api/subscribe/getone-subscribe/${nonExistentId}`);
+     
+      expect(response.status).toBe(404);
+      expect(response.body).toHaveProperty('message', 'Subscription not found');
+     });
+     
+     it('should return 500 for internal server error during retrieving a single subscription', async () => {
+      jest.spyOn(Subscribe, 'findById').mockRejectedValue(new Error('Internal Server Error'));
+     
+      const existingSubscribe = await Subscribe.create({
+        email: "seambroi4@gmail.com",
+        date: new Date(),
+      });
+     
+      const response = await request.get(`/api/subscribe/getone-subscribe/${existingSubscribe._id}`);
+     
+      expect(response.status).toBe(500);
+      expect(response.body).toHaveProperty('error', 'Internal Server Error');
+     });
+
+
+
+
+   });
+
+   
+   
+   
+   
+
 

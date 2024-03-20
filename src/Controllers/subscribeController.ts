@@ -1,14 +1,9 @@
 import { Request, Response } from "express";
-import { Subscribe, validateSubscribeModelData } from "../Models/subscribeModel";
+import { Subscribe } from "../Models/subscribeModel";
 
 class SubscribeController {
     static async createSubscribe(req: Request, res: Response) {
         try {
-            const { error } = validateSubscribeModelData(req.body);
-            if (error) {
-                return res.status(400).send(error.details[0].message);
-            }
-
             // Check if email already exists
             const existingSubscribe = await Subscribe.findOne({ email: req.body.email });
             if (existingSubscribe) {
@@ -106,24 +101,15 @@ class SubscribeController {
     }
 
     static async deleteSubscription(req: Request, res: Response) {
-        try {
-            const subscriptionId = req.params.id;
-            const subscription = await Subscribe.findById(subscriptionId);
-
-            if (!subscription) {
-                return res.status(404).json({
-                    message: "Subscription not found",
-                });
-            }
+   
+            // const subscriptionId = req.params.id;
+            const subscriptionId = await Subscribe.findById(req.params.id);
 
             await Subscribe.findByIdAndDelete(subscriptionId);
             return res.status(204).json({
                 message: 'Subscription deleted successfully',
             });
-        } catch (error) {
-            console.error(error);
-            return res.status(500).json({ error: 'Internal Server Error' });
-        }
+
     }
 }
 
