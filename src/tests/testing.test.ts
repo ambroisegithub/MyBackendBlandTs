@@ -4,17 +4,17 @@ import { User } from "../Models/UserModel";
 import bcrypt from "bcryptjs";
 import UserMiddleware from "../Middlewares/UserMiddleware";
 
-import fs from "fs";
+
 import { ContactUs } from "../Models/contactUsmodels";
 import { Subscribe } from "../Models/subscribeModel";
 
 
-
-import { Authorization } from "../Middlewares/Authorization";
-import path from "path";
 import { Blog } from "../Models/BlogModel";
-import jwt from "jsonwebtoken";
 const request = supertest(app);
+import { Authorization } from "../Middlewares/Authorization";
+import jwt from "jsonwebtoken";
+import path from "path";
+import fs from 'fs';
 beforeAll(async () => {
   await connectToDatabase();
 });
@@ -22,6 +22,10 @@ beforeAll(async () => {
 // Delete all data from the database
 afterAll(async () => {
   await User.deleteMany({});
+  await Blog.deleteMany({});
+  await ContactUs.deleteMany({});
+  await Subscribe.deleteMany({});
+
   server.close();
 });
 
@@ -314,7 +318,8 @@ it("returns 404 when attempting to delete non-existing user", async () => {
     
   })
   
-
+  
+  // ******************************************* Authorization Middleware of Admin Test******************
 
   describe("Authorization Middleware", () => {
     let token: string;
@@ -730,6 +735,45 @@ it("should return 500 for internal server error", async () => {
  });
 
 
+    // Test for updating a blog
+    // it("should update a blog with valid data", async () => {
+    //   const blogData = {
+    //      blogTitle: "Updated Blog",
+    //      blogDescription: "This is an updated blog",
+    //      blogDate: new Date().toISOString(),
+    //      blogImage: "updatedTest.png",
+    //   };
+     
+    //   const filePath = path.join(__dirname, "updatedTest.jpg");
+    //   if (!fs.existsSync(filePath)) {
+    //      throw new Error("Test file not found");
+    //   }
+     
+    //   const response = await request
+    //      .put(`/api/blog/update-blog/${existingBlog._id}`)
+    //      .set("Authorization", `${adminToken}`)
+    //      .field("blogTitle", blogData.blogTitle)
+    //      .field("blogDescription", blogData.blogDescription)
+    //      .field("blogDate", blogData.blogDate)
+    //      .attach("blogImage", filePath);
+     
+    //   expect(response.status).toBe(200);
+    //   expect(response.body).toHaveProperty("message", "Blog successfully updated");
+    //   expect(response.body).toHaveProperty("data");
+    //   expect(response.body.data).toHaveProperty("blogTitle", blogData.blogTitle);
+    //   expect(response.body.data).toHaveProperty("blogDescription", blogData.blogDescription);
+    //   expect(response.body.data).toHaveProperty("blogDate", new Date(blogData.blogDate).toISOString());
+    //   expect(response.body.data).toHaveProperty("blogImage", expect.stringContaining("https://res.cloudinary.com"));
+    //  }, 30000); 
+     // Increase timeout to 30 seconds
+     
+// Test for getting all blogs
+it("should retrieve all blogs and return success", async () => {
+  const response = await request.get("/api/blog/getall-blog");
+  expect(response.status).toBe(200);
+  expect(response.body).toHaveProperty("data");
+  expect(response.body.data).toBeInstanceOf(Array);
+});
 
 // Error handling test for getAllBlogs
 it("should return 500 for internal server error during retrieving all blogs", async () => {
@@ -1205,249 +1249,4 @@ it("should return 500 for internal server error during blog deletion", async () 
       expect(response.body).toHaveProperty('error', 'Internal Server Error');
      });
 
-
-
-
    });
-
-   
-   
-   
-   
-
-
-  describe("Blog API Testing", () => {
-    let adminToken:string;
-     let existingBlog: any;
-    beforeAll(async () => {
-       // Create an admin user
-       const adminUser = new User({
-         email: "admin@example.com",
-         fullName: "Admin User",
-         gender:"male",
-         password: "admin123",
-         userRole: "admin",
-       });
-       await adminUser.save();
-   
-       // Generate a JWT token for the admin user
-       adminToken = jwt.sign({ id: adminUser._id }, process.env.JWT_SECRET || "", {
-         expiresIn: "20h",
-       });
-       
-  // Create an example blog
-  existingBlog = new Blog({
-    blogTitle: "Example Blog",
-    blogDescription: "This is an example blog",
-    blogDate: new Date().toISOString(),
-    blogImage: "test.jpeg",
-  });
-  await existingBlog.save();
-    });
-   
-    it("should create a new blog with valid data when user is an admin", async () => {
-       const blogData = {
-         blogTitle: "Test Blog",
-         blogDescription: "This is a test blog",
-         blogDate: new Date().toISOString(),
-         blogImage: "test.jpeg",
-       };
-   
-       // Ensure the file exists at the specified path
-       const filePath = path.join(__dirname, "test.jpeg");
-       if (!fs.existsSync(filePath)) {
-         throw new Error("Test file not found");
-       }
-   
-       const response = await request
-         .post("/api/blog/post-blog")
-         .set("Authorization", `${adminToken}`)
-         .field("blogTitle", blogData.blogTitle)
-         .field("blogDescription", blogData.blogDescription)
-         .field("blogDate", blogData.blogDate)
-         .attach("blogImage", filePath);
-   
-       expect(response.status).toBe(201);
-       expect(response.body).toHaveProperty("message", "Blog successfully created");
-       expect(response.body).toHaveProperty("data");
-       expect(response.body.data).toHaveProperty("blogTitle", blogData.blogTitle);
-       expect(response.body.data).toHaveProperty("blogDescription", blogData.blogDescription);
-       expect(response.body.data).toHaveProperty("blogDate", new Date(blogData.blogDate).toISOString());
-       expect(response.body.data).toHaveProperty("blogImage", expect.stringContaining("https://res.cloudinary.com"));
-                 
-    });
-
-
-    // Test for getting all blogs
-it("should retrieve all blogs and return success", async () => {
-  const response = await request.get("/api/blog/getall-blog");
-  expect(response.status).toBe(200);
-  expect(response.body).toHaveProperty("data");
-  expect(response.body.data).toBeInstanceOf(Array);
-});
-
-// Test for getting a single blog by ID
-it("should retrieve a single blog and return success", async () => {
-  const response = await request.get(`/api/blog/getone-blog/${existingBlog._id}`);
-  expect(response.status).toBe(200);
-  expect(response.body).toHaveProperty("data");
-  expect(response.body.data).toHaveProperty("blogTitle");
-  expect(response.body.data).toHaveProperty("blogDescription");
-  expect(response.body.data).toHaveProperty("blogDate");
-  expect(response.body.data).toHaveProperty("blogImage");
-});
-
-// Test for deleting a blog
-it("should delete a blog and return success", async () => {
-  const response = await request.delete(`/api/blog/delete-blog/${existingBlog._id}`)
-    .set("Authorization", `${adminToken}`);
-  expect(response.status).toBe(204);
-});
-
-
-it("should return 400 if blog data is invalid", async () => {
-  const invalidBlogData = {
-    blogTitle: "", // Invalid data
-    blogDescription: "This is an invalid blog",
-    blogDate: new Date().toISOString(),
-    blogImage: "invalid.png",
-  };
-
-  const filePath = path.join(__dirname, "invalid.png");
-  if (!fs.existsSync(filePath)) {
-    throw new Error("Invalid file not found");
-  }
-
-  const response = await request
-    .post("/api/blog/post-blog")
-    .set("Authorization", `${adminToken}`)
-    .field("blogTitle", invalidBlogData.blogTitle)
-    .field("blogDescription", invalidBlogData.blogDescription)
-    .field("blogDate", invalidBlogData.blogDate)
-    .attach("blogImage", filePath);
-
-  expect(response.status).toBe(400);
-  expect(response.text).toContain("\"blogTitle\" is not allowed to be empty");
-});
-
-it("should return 400 if no file is uploaded", async () => {
-  const blogData = {
-    blogTitle: "Test Blog",
-    blogDescription: "This is a test blog",
-    blogDate: new Date().toISOString(),
-    blogImage: "test.png",
-  };
-
-  const response = await request
-    .post("/api/blog/post-blog")
-    .set("Authorization", `${adminToken}`)
-    .field("blogTitle", blogData.blogTitle)
-    .field("blogDescription", blogData.blogDescription)
-    .field("blogDate", blogData.blogDate);
-
-  expect(response.status).toBe(400);
-  expect(response.body).toHaveProperty("message", "Please upload a file");
-});
-
-// Error handling test
-it("should return 500 for internal server error", async () => {
-  jest.spyOn(console, "error").mockImplementation(() => {}); // Suppress console.error output
-  jest.spyOn(Blog.prototype, "save").mockRejectedValue(new Error("Internal Server Error"));
-
-  const blogData = {
-    blogTitle: "Test Blog",
-    blogDescription: "This is a test blog",
-    blogDate: new Date().toISOString(),
-    blogImage: "test.png",
-  };
-
-  const filePath = path.join(__dirname, "test.png");
-  if (!fs.existsSync(filePath)) {
-    throw new Error("Test file not found");
-  }
-
-  const response = await request
-    .post("/api/blog/post-blog")
-    .set("Authorization", `${adminToken}`)
-    .field("blogTitle", blogData.blogTitle)
-    .field("blogDescription", blogData.blogDescription)
-    .field("blogDate", blogData.blogDate)
-    .attach("blogImage", filePath);
-
-  expect(response.status).toBe(500);
-  expect(response.body).toHaveProperty("error", "Internal Server Error");
-});
-
- 
-it("should return 404 when updating a non-existent blog", async () => {
-  const nonExistentBlogId = "609df8e15715ab2374e0e29f"; // Use a non-existent ID
-  const updateData = {
-     blogTitle: "Updated Title",
-     blogDescription: "Updated Description",
-     blogDate: new Date().toISOString(),
-  };
- 
-  const response = await request
-     .put(`/api/blog/update-blog/${nonExistentBlogId}`)
-     .set("Authorization", `${adminToken}`)
-     .send(updateData);
- 
-  expect(response.status).toBe(404);
-  expect(response.body).toHaveProperty("message", "Blog not found");
- });
-
- 
- it("should return 404 when retrieving a non-existent blog", async () => {
-  const nonExistentBlogId = "609df8e15715ab2374e0e29f"; // Use a non-existent ID
- 
-  const response = await request.get(`/api/blog/getone-blog/${nonExistentBlogId}`);
- 
-  expect(response.status).toBe(404);
-  expect(response.body).toHaveProperty("message", "Blog not found");
- });
-
- 
- it("should return 404 when deleting a non-existent blog", async () => {
-  const nonExistentBlogId = "609df8e15715ab2374e0e29f"; // Use a non-existent ID
- 
-  const response = await request.delete(`/api/blog/delete-blog/${nonExistentBlogId}`)
-     .set("Authorization", `${adminToken}`);
- 
-  expect(response.status).toBe(404);
-  expect(response.body).toHaveProperty("message", "Blog not found");
- });
-
-
-
-// Error handling test for getAllBlogs
-it("should return 500 for internal server error during retrieving all blogs", async () => {
-  jest.spyOn(console, "error").mockImplementation(() => {}); // Suppress console.error output
-  jest.spyOn(Blog, "find").mockRejectedValue(new Error("Internal Server Error"));
-
-  const response = await request.get("/api/blog/getall-blog");
-  expect(response.status).toBe(500);
-  expect(response.body).toHaveProperty("error", "Internal Server Error");
-});
-
-// Error handling test for getOneBlog
-it("should return 500 for internal server error during retrieving a single blog", async () => {
-  jest.spyOn(console, "error").mockImplementation(() => {}); // Suppress console.error output
-  jest.spyOn(Blog, "findById").mockRejectedValue(new Error("Internal Server Error"));
-
-  const response = await request.get(`/api/blog/getone-blog/${existingBlog._id}`);
-  expect(response.status).toBe(500);
-  expect(response.body).toHaveProperty("error", "Internal Server Error");
-});
-
-// Error handling test for deleteBlog
-it("should return 500 for internal server error during blog deletion", async () => {
-  jest.spyOn(console, "error").mockImplementation(() => {}); // Suppress console.error output
-  jest.spyOn(Blog, "findByIdAndDelete").mockRejectedValue(new Error("Internal Server Error"));
-
-  const response = await request.delete(`/api/blog/delete-blog/${existingBlog._id}`)
-    .set("Authorization", `${adminToken}`);
-  expect(response.status).toBe(500);
-  expect(response.body).toHaveProperty("error", "Internal Server Error");
-});
- 
-  });
