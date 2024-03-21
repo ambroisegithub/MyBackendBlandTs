@@ -1207,9 +1207,6 @@ it("should return 500 for internal server error during blog deletion", async () 
       expect(response.body).toHaveProperty('error', 'Internal Server Error');
      });
 
-
-
-
    });
 
    

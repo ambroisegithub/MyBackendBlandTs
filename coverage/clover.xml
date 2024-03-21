@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1710970488150" clover="3.2.0">
-  <project timestamp="1710970488150" name="All files">
-    <metrics statements="1002" coveredstatements="960" conditionals="133" coveredconditionals="104" methods="28" coveredmethods="28" elements="1163" coveredelements="1092" complexity="0" loc="1002" ncloc="1002" packages="5" files="16" classes="16"/>
+<coverage generated="1711011121768" clover="3.2.0">
+  <project timestamp="1711011121769" name="All files">
+    <metrics statements="999" coveredstatements="957" conditionals="133" coveredconditionals="104" methods="28" coveredmethods="28" elements="1160" coveredelements="1089" complexity="0" loc="999" ncloc="999" packages="5" files="16" classes="16"/>
     <package name="Controllers">
       <metrics statements="557" coveredstatements="557" conditionals="105" coveredconditionals="86" methods="21" coveredmethods="21"/>
       <file name="BlogController.ts" path="/home/god-did/Myprojects/MybrandBackend-Ts/src/Controllers/BlogController.ts">
@@ -753,7 +753,7 @@
       </file>
     </package>
     <package name="Models">
-      <metrics statements="234" coveredstatements="234" conditionals="3" coveredconditionals="3" methods="3" coveredmethods="3"/>
+      <metrics statements="231" coveredstatements="231" conditionals="3" coveredconditionals="3" methods="3" coveredmethods="3"/>
       <file name="BlogModel.ts" path="/home/god-did/Myprojects/MybrandBackend-Ts/src/Models/BlogModel.ts">
         <metrics statements="85" coveredstatements="85" conditionals="1" coveredconditionals="1" methods="1" coveredmethods="1"/>
         <line num="1" count="1" type="stmt"/>
@@ -961,7 +961,7 @@
         <line num="54" count="1" type="stmt"/>
       </file>
       <file name="subscribeModel.ts" path="/home/god-did/Myprojects/MybrandBackend-Ts/src/Models/subscribeModel.ts">
-        <metrics statements="37" coveredstatements="37" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
+        <metrics statements="34" coveredstatements="34" conditionals="0" coveredconditionals="0" methods="0" coveredmethods="0"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
         <line num="3" count="1" type="stmt"/>
@@ -996,9 +996,6 @@
         <line num="32" count="1" type="stmt"/>
         <line num="33" count="1" type="stmt"/>
         <line num="34" count="1" type="stmt"/>
-        <line num="35" count="1" type="stmt"/>
-        <line num="36" count="1" type="stmt"/>
-        <line num="37" count="1" type="stmt"/>
       </file>
     </package>
     <package name="Routes">
