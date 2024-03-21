@@ -3,15 +3,17 @@ import { app, server, connectToDatabase } from "./index.test";
 import { User } from "../Models/UserModel";
 import bcrypt from "bcryptjs";
 import UserMiddleware from "../Middlewares/UserMiddleware";
-import { Authorization } from "../Middlewares/Authorization";
-import path from "path";
-import fs from "fs";
+
 import { Blog } from "../Models/BlogModel";
 import { ContactUs } from "../Models/contactUsmodels";
 import { Subscribe } from "../Models/subscribeModel";
 
-import jwt from "jsonwebtoken";
+
 const request = supertest(app);
+import { Authorization } from "../Middlewares/Authorization";
+import jwt from "jsonwebtoken";
+import path from "path";
+import fs from 'fs';
 beforeAll(async () => {
   await connectToDatabase();
 });
