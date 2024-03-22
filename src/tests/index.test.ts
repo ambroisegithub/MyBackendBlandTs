@@ -31,6 +31,7 @@ app.use('/api/blog', blogRoutes);
 app.use('/api/contactus', contactUsRoutes);
 app.use('/api/subscribe', subscribeRoutes);
 app.use('/api/comlike', commentRoutes);
+
 app.get("/", (req: Request, res: Response) => {
   return res.json({ message: "Welcome To My portfolio API" });
 });
