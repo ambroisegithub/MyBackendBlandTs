@@ -10,6 +10,7 @@ dotenv.config();
 import blogRoutes from "../Routes/BlogRoute";
 import contactUsRoutes from "../Routes/contactUsRoutes";
 import subscribeRoutes from "../Routes/subscribeRoute";
+import commentRoutes from "../Routes/commentRoutes";
 mongoose.set("strictQuery", false);
 
 // Exporting a function to establish the database connection
@@ -29,6 +30,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/blog', blogRoutes);
 app.use('/api/contactus', contactUsRoutes);
 app.use('/api/subscribe', subscribeRoutes);
+app.use('/api/comlike', commentRoutes);
 
 app.get("/", (req: Request, res: Response) => {
   return res.json({ message: "Welcome To My portfolio API" });
