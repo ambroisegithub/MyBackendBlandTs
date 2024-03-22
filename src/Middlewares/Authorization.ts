@@ -11,7 +11,6 @@ interface JwtPayload {
 }
 export const Authorization = async (req: Request, res: Response, next: any) => {
   try {
-    // console.log(req.headers);
     const token = req.headers.authorization;
 
     if (token) {
@@ -43,7 +42,6 @@ export const Authorization = async (req: Request, res: Response, next: any) => {
       }
     }
   } catch (error) {
-    console.error(error);
     return res.status(401).json({
       message: "Check if your token is valid.",
     });
