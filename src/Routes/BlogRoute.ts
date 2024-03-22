@@ -13,4 +13,5 @@ blogRoutes.put('/update-blog/:id', upload.single('blogImage'), Authorization,Blo
 blogRoutes.get('/getall-blog',BlogController.getAllBlogs);
 blogRoutes.get('/getone-blog/:id', BlogController.getOneBlog);
 blogRoutes.delete('/delete-blog/:id', Authorization,BlogController.deleteBlog);
+
 export default blogRoutes;

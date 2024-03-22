@@ -3,15 +3,18 @@ import { app, server, connectToDatabase } from "./index.test";
 import { User } from "../Models/UserModel";
 import bcrypt from "bcryptjs";
 import UserMiddleware from "../Middlewares/UserMiddleware";
-import { Authorization } from "../Middlewares/Authorization";
-import path from "path";
-import fs from "fs";
-import { Blog } from "../Models/BlogModel";
+
+
 import { ContactUs } from "../Models/contactUsmodels";
 import { Subscribe } from "../Models/subscribeModel";
 
-import jwt from "jsonwebtoken";
+
+import { Blog } from "../Models/BlogModel";
 const request = supertest(app);
+import { Authorization } from "../Middlewares/Authorization";
+import jwt from "jsonwebtoken";
+import path from "path";
+import fs from 'fs';
 beforeAll(async () => {
   await connectToDatabase();
 });
@@ -944,6 +947,45 @@ it("should return 500 for internal server error", async () => {
  });
 
 
+    // Test for updating a blog
+    // it("should update a blog with valid data", async () => {
+    //   const blogData = {
+    //      blogTitle: "Updated Blog",
+    //      blogDescription: "This is an updated blog",
+    //      blogDate: new Date().toISOString(),
+    //      blogImage: "updatedTest.png",
+    //   };
+     
+    //   const filePath = path.join(__dirname, "updatedTest.jpg");
+    //   if (!fs.existsSync(filePath)) {
+    //      throw new Error("Test file not found");
+    //   }
+     
+    //   const response = await request
+    //      .put(`/api/blog/update-blog/${existingBlog._id}`)
+    //      .set("Authorization", `${adminToken}`)
+    //      .field("blogTitle", blogData.blogTitle)
+    //      .field("blogDescription", blogData.blogDescription)
+    //      .field("blogDate", blogData.blogDate)
+    //      .attach("blogImage", filePath);
+     
+    //   expect(response.status).toBe(200);
+    //   expect(response.body).toHaveProperty("message", "Blog successfully updated");
+    //   expect(response.body).toHaveProperty("data");
+    //   expect(response.body.data).toHaveProperty("blogTitle", blogData.blogTitle);
+    //   expect(response.body.data).toHaveProperty("blogDescription", blogData.blogDescription);
+    //   expect(response.body.data).toHaveProperty("blogDate", new Date(blogData.blogDate).toISOString());
+    //   expect(response.body.data).toHaveProperty("blogImage", expect.stringContaining("https://res.cloudinary.com"));
+    //  }, 30000); 
+     // Increase timeout to 30 seconds
+     
+// Test for getting all blogs
+it("should retrieve all blogs and return success", async () => {
+  const response = await request.get("/api/blog/getall-blog");
+  expect(response.status).toBe(200);
+  expect(response.body).toHaveProperty("data");
+  expect(response.body.data).toBeInstanceOf(Array);
+});
 
 // Error handling test for getAllBlogs
 it("should return 500 for internal server error during retrieving all blogs", async () => {
@@ -1421,9 +1463,10 @@ it("should return 500 for internal server error during blog deletion", async () 
       expect(response.body).toHaveProperty('error', 'Internal Server Error');
      });
 
+
+
+
    });
-
-
 
    
    
