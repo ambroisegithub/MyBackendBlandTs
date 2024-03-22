@@ -24,8 +24,7 @@ export const options = {
       },
       servers: [
         {
-          url: "https://mybackendblandts.onrender.com",
-       
+          url: "http://localhost:3000",
         },
       ],
     },
