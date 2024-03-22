@@ -11,9 +11,7 @@ import contactUsRoutes from "./src/Routes/contactUsRoutes";
 import subscribeRoutes from "./src/Routes/subscribeRoute";
 import cors from "cors";
 import helmet from "helmet";
-
 dotenv.config();
-
 mongoose.set("strictQuery", false);
 mongoose
   .connect(process.env.MONGODB_URL as string)
