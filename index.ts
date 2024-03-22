@@ -33,7 +33,7 @@ app.use(helmet());
 app.use(morgan("dev"));
 app.use('/api/user', userRoutes);
 app.use('/api/blog', blogRoutes);
-app.use('/api/blog', commentRoutes);
+app.use('/api/comlike', commentRoutes);
 app.use('/api/contactus', contactUsRoutes);
 app.use('/api/subscribe', subscribeRoutes);
 

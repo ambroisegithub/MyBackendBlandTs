@@ -454,6 +454,197 @@ it("returns 404 when attempting to delete non-existing user", async () => {
 
   // ******************************************* Blog Api Test******************
 
+
+
+  // Test adding a comment to a blog
+describe("Add Comment to Blog", () => {
+  
+  let userToken:string;
+     let existingBlog: any;
+
+    beforeAll(async () => {
+       // Create an Normal user
+       const UserUser = new User({
+         email: "user@example.com",
+         fullName: "User Role",
+         gender:"male",
+         password: "user123",
+         userRole: "user",
+       });
+       await UserUser.save();
+   
+       // Generate a JWT token for the Normal user
+       userToken = jwt.sign({ id: UserUser._id }, process.env.JWT_SECRET || "", {
+         expiresIn: "20h",
+       });
+       
+        // Create an example blog
+     existingBlog = new Blog({
+       blogTitle: "Example Blog",
+       blogDescription: "This is an example blog",
+       blogDate: new Date().toISOString(),
+       blogImage: "test.jpeg",
+     });
+     await existingBlog.save();
+       });
+
+// Test for invalid comment data
+it("should return 400 for invalid comment data", async () => {
+  const commentData = {
+     comment: "", // Invalid comment data
+     blogSubject: "Example Blog",
+  };
+ 
+  const response = await request
+     .post(`/api/comlike/${existingBlog._id}/comments`)
+     .set("Authorization", `${userToken}`)
+     .send(commentData);
+ 
+  expect(response.status).toBe(400);
+  expect(response.text).toContain("\"comment\" is not allowed to be empty");
+
+ });
+
+
+  it("should add a comment to a blog when user is authenticated and has userRole of 'user'", async () => {
+     const commentData = {
+       comment: "This is a test comment",
+       blogSubject: "Example Blog",
+     };
+ 
+     const response = await request
+       .post(`/api/comlike/${existingBlog._id}/comments`)
+       .set("Authorization", `${userToken}`)
+       .send(commentData);
+ 
+     expect(response.status).toBe(201);
+     expect(response.body).toHaveProperty("message", "Comment added successfully");
+  });
+
+
+  // Test for unauthenticated comment addition
+it("should return 401 for unauthenticated comment addition", async () => {
+  const commentData = {
+     comment: "This is a test comment",
+     blogSubject: "Example Blog",
+  };
+ 
+  const response = await request
+     .post(`/api/comlike/${existingBlog._id}/comments`)
+     .send(commentData); // No Authorization header
+ 
+  expect(response.status).toBe(401);
+ });
+
+
+// Test for non-existent blog in comment addition
+it("should return 404 for non-existent blog in comment addition", async () => {
+  const nonExistentBlogId = "609df8e15715ab2374e0e29f"; // Use a non-existent ID
+
+  const commentData = {
+     comment: "This is a test comment",
+     blogSubject: "Example Blog",
+  };
+ 
+  const response = await request
+     .post(`/api/comlike/${nonExistentBlogId}/comments`) // Non-existent blog ID
+     .set("Authorization", `${userToken}`)
+     .send(commentData);
+ 
+  expect(response.status).toBe(404);
+ });
+
+
+
+ });
+ 
+ // Test liking a blog
+ describe("Like Blog", () => {
+
+  let userToken:string;
+     let existingBlog: any;
+
+    beforeAll(async () => {
+       // Create an Normal user
+       const UserUser = new User({
+         email: "like@example.com",
+         fullName: "User Role",
+         gender:"male",
+         password: "user123",
+         userRole: "user",
+       });
+       await UserUser.save();
+   
+       // Generate a JWT token for the Normal user
+       userToken = jwt.sign({ id: UserUser._id }, process.env.JWT_SECRET || "", {
+         expiresIn: "20h",
+       });
+       
+        // Create an example blog
+     existingBlog = new Blog({
+       blogTitle: "Example Blog",
+       blogDescription: "This is an example blog",
+       blogDate: new Date().toISOString(),
+       blogImage: "test.jpeg",
+     });
+     await existingBlog.save();
+       });
+
+       it("should return 400 for invalid blog ID in like request", async () => {
+        const response = await request
+           .post(`/api/comlike/invalidBlogId/like`) // Invalid blog ID
+           .set("Authorization", `${userToken}`);
+       
+        expect(response.status).toBe(400);
+       });
+
+
+  it("should like a blog when user is authenticated and has userRole of 'user'", async () => {
+     const response = await request
+       .post(`/api/comlike/${existingBlog._id}/like`)
+       .set("Authorization", `${userToken}`);
+ 
+     expect(response.status).toBe(201);
+     expect(response.body).toHaveProperty("message", "Blog liked successfully");
+     expect(response.body).toHaveProperty("likes", 1);
+  });
+
+
+  // Test for unauthenticated blog liking
+it("should return 401 for unauthenticated blog liking", async () => {
+  const response = await request
+     .post(`/api/comlike/${existingBlog._id}/like`) // No Authorization header
+     .send();
+ 
+  expect(response.status).toBe(401);
+ });
+
+
+
+ // Test for non-existent blog in blog liking
+it("should return 404 for non-existent blog in blog liking", async () => {
+  const nonExistentBlogId="609df8e15715ab2374e0e29f"
+  const response = await request
+     .post(`/api/comlike/${nonExistentBlogId}/like`) // Non-existent blog ID
+     .set("Authorization", `${userToken}`);
+ 
+  expect(response.status).toBe(404);
+ });
+ 
+ // Test for already liked blog
+ it("should return 400 for already liked blog", async () => {
+  // Assuming the user has already liked the blog in a previous test
+  const response = await request
+     .post(`/api/comlike/${existingBlog._id}/like`)
+     .set("Authorization", `${userToken}`);
+ 
+  expect(response.status).toBe(400);
+  expect(response.body).toHaveProperty("message", "You have already liked this blog");
+ });
+
+
+ });
+
   describe("Blog API Testing", () => {
     let adminToken:string;
      let existingBlog: any;
@@ -933,6 +1124,8 @@ it("should return 500 for internal server error during blog deletion", async () 
      
    });
 
+
+
    describe('Contact Us API Error Handling', () => {
     it('should return 500 for internal server error during contact request creation', async () => {
        jest.spyOn(ContactUs.prototype, 'save').mockRejectedValue(new Error('Internal Server Error'));
@@ -1208,6 +1401,8 @@ it("should return 500 for internal server error during blog deletion", async () 
      });
 
    });
+
+
 
    
    

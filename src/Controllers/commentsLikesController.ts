@@ -17,7 +17,7 @@ const likeSchema = Joi.object({
 
 export default class CommentsLikesController {
     static async addComment(req: Request, res: Response) {
-        try {
+     
             const { error } = commentSchema.validate(req.body);
             if (error) {
                 return res.status(400).json({ message: error.details[0].message });
@@ -46,13 +46,11 @@ export default class CommentsLikesController {
             await blog.save();
 
             return res.status(201).json({ message: "Comment added successfully" });
-        } catch (error) {
-            return res.status(500).json({ message: "Internal Server Error" });
-        }
+
     }
 
     static async likeBlog(req: Request, res: Response) {
-        try {
+
             const { error } = likeSchema.validate(req.params);
             if (error) {
                 return res.status(400).json({ message: error.details[0].message });
@@ -79,8 +77,6 @@ export default class CommentsLikesController {
             await blog.save();
 
             return res.status(201).json({ message: "Blog liked successfully", likes: blog.likes });
-        } catch (error) {
-            return res.status(500).json({ message: "Internal Server Error" });
-        }
+    
     }
 }
