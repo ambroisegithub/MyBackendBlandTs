@@ -3,15 +3,18 @@ import { app, server, connectToDatabase } from "./index.test";
 import { User } from "../Models/UserModel";
 import bcrypt from "bcryptjs";
 import UserMiddleware from "../Middlewares/UserMiddleware";
-import { Authorization } from "../Middlewares/Authorization";
-import path from "path";
-import fs from "fs";
-import { Blog } from "../Models/BlogModel";
+
+
 import { ContactUs } from "../Models/contactUsmodels";
 import { Subscribe } from "../Models/subscribeModel";
 
-import jwt from "jsonwebtoken";
+
+import { Blog } from "../Models/BlogModel";
 const request = supertest(app);
+import { Authorization } from "../Middlewares/Authorization";
+import jwt from "jsonwebtoken";
+import path from "path";
+import fs from 'fs';
 beforeAll(async () => {
   await connectToDatabase();
 });
@@ -317,79 +320,108 @@ it("returns 404 when attempting to delete non-existing user", async () => {
   
   
   // ******************************************* Authorization Middleware of Admin Test******************
-
   describe("Authorization Middleware", () => {
     let token: string;
-  
+   
+    beforeAll(async () => {
+       await connectToDatabase();
+    });
+   
+    afterAll(async () => {
+       await User.deleteMany({});
+       await Blog.deleteMany({});
+       await ContactUs.deleteMany({});
+       await Subscribe.deleteMany({});
+       server.close();
+    });
+   
     beforeEach(() => {
-      const mockUser = new User({
-        email: "test@test.com",
-        fullName: "Test User",
-        password: "password123",
-        userRole: "admin",
-      });
-      token = jwt.sign({ id: mockUser._id }, process.env.JWT_SECRET || "");
+       const mockUser = new User({
+         email: "test@test.com",
+         fullName: "Test User",
+         password: "password123",
+         userRole: "admin",
+       });
+       token = jwt.sign({ id: mockUser._id }, process.env.JWT_SECRET || "");
     });
-  
-
+   
     it("should return 401 for non-admin user", async () => {
-      // Change the user role to 'user' to simulate non-admin user
-      const mockUser = new User({
-        email: "test@test.com",
-        fullName: "Test User",
-        password: "password123",
-        userRole: "user",
-      });
-      const token = jwt.sign({ id: mockUser._id }, process.env.JWT_SECRET || "");
-  
-      const req: any = {
-        headers: {
-          authorization: token,
-        },
-      };
-      const res: any = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-      };
-      const next = jest.fn();
-  
-      await Authorization(req, res, next);
-  
-      expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "This action is permitted only for admins.",
-      });
-      expect(next).not.toHaveBeenCalled();
+       const mockUser = new User({
+         email: "test@test.com",
+         fullName: "Test User",
+         password: "password123",
+         userRole: "user",
+       });
+       const token = jwt.sign({ id: mockUser._id }, process.env.JWT_SECRET || "");
+   
+       const req: any = {
+         headers: {
+           authorization: token,
+         },
+       };
+       const res: any = {
+         status: jest.fn().mockReturnThis(),
+         json: jest.fn(),
+       };
+       const next = jest.fn();
+   
+       await Authorization(req, res, next);
+   
+       expect(res.status).toHaveBeenCalledWith(401);
+       expect(res.json).toHaveBeenCalledWith({
+         message: "This action is permitted only for admins.",
+       });
+       expect(next).not.toHaveBeenCalled();
     });
-  
-
-  
+   
     it("should return 401 for expired token", async () => {
-      const expiredToken = jwt.sign(
-        { id: "mockusers._id" },
-        process.env.JWT_SECRET || "",
-        { expiresIn: 0 }
-      );
-      const req: any = {
-        headers: {
-          authorization: expiredToken,
-        },
-      };
-      const res: any = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-      };
-      const next = jest.fn();
-  
-      await Authorization(req, res, next);
-  
-      expect(res.status).toHaveBeenCalledWith(401);
-      expect(res.json).toHaveBeenCalledWith({
-        message: "Check if your token is valid.",
-      });
-      expect(next).not.toHaveBeenCalled();
+       const expiredToken = jwt.sign(
+         { id: "mockusers._id" },
+         process.env.JWT_SECRET || "",
+         { expiresIn: 0 }
+       );
+       const req: any = {
+         headers: {
+           authorization: expiredToken,
+         },
+       };
+       const res: any = {
+         status: jest.fn().mockReturnThis(),
+         json: jest.fn(),
+       };
+       const next = jest.fn();
+   
+       await Authorization(req, res, next);
+   
+       expect(res.status).toHaveBeenCalledWith(401);
+       expect(res.json).toHaveBeenCalledWith({
+         message: "Check if your token is valid.",
+       });
+       expect(next).not.toHaveBeenCalled();
     });
-  });
+   
+
+    it("should return 401 if token is invalid", async () => {
+       const req: any = {
+         headers: {
+           authorization: "invalidToken",
+         },
+       };
+       const res: any = {
+         status: jest.fn().mockReturnThis(),
+         json: jest.fn(),
+       };
+       const next = jest.fn();
+   
+       await Authorization(req, res, next);
+   
+       expect(res.status).toHaveBeenCalledWith(401);
+       expect(res.json).toHaveBeenCalledWith({
+         message: "Check if your token is valid.",
+       });
+       expect(next).not.toHaveBeenCalled();
+    });
+   });
   
   describe("User Middleware", () => {
     let token: string;
@@ -456,194 +488,186 @@ it("returns 404 when attempting to delete non-existing user", async () => {
 
 
 
-  // Test adding a comment to a blog
+// Test adding a comment to a blog
 describe("Add Comment to Blog", () => {
-  
   let userToken:string;
-     let existingBlog: any;
+  let existingBlog: any;
 
-    beforeAll(async () => {
-       // Create an Normal user
-       const UserUser = new User({
-         email: "user@example.com",
-         fullName: "User Role",
-         gender:"male",
-         password: "user123",
-         userRole: "user",
-       });
-       await UserUser.save();
-   
-       // Generate a JWT token for the Normal user
-       userToken = jwt.sign({ id: UserUser._id }, process.env.JWT_SECRET || "", {
-         expiresIn: "20h",
-       });
-       
-        // Create an example blog
-     existingBlog = new Blog({
-       blogTitle: "Example Blog",
-       blogDescription: "This is an example blog",
-       blogDate: new Date().toISOString(),
-       blogImage: "test.jpeg",
-     });
-     await existingBlog.save();
-       });
+  beforeAll(async () => {
+    // Create a Normal user
+    const UserUser = new User({
+      email: "user@example.com",
+      fullName: "User Role",
+      gender:"male",
+      password: "user123",
+      userRole: "user",
+    });
+    await UserUser.save();
 
-// Test for invalid comment data
-it("should return 400 for invalid comment data", async () => {
-  const commentData = {
-     comment: "", // Invalid comment data
-     blogSubject: "Example Blog",
-  };
- 
-  const response = await request
-     .post(`/api/comlike/${existingBlog._id}/comments`)
-     .set("Authorization", `${userToken}`)
-     .send(commentData);
- 
-  expect(response.status).toBe(400);
-  expect(response.text).toContain("\"comment\" is not allowed to be empty");
-
- });
-
+    // Generate a JWT token for the Normal user
+    userToken = jwt.sign({ id: UserUser._id }, process.env.JWT_SECRET || "", {
+      expiresIn: "20h",
+    });
+    
+    // Create an example blog
+    existingBlog = new Blog({
+      blogTitle: "Example Blog",
+      blogDescription: "This is an example blog",
+      blogDate: new Date().toISOString(),
+      blogImage: "test.jpeg",
+    });
+    await existingBlog.save();
+  });
 
   it("should add a comment to a blog when user is authenticated and has userRole of 'user'", async () => {
-     const commentData = {
-       comment: "This is a test comment",
+    const commentData = {
+      comment: "This is a test comment",
+      blogSubject: "Example Blog",
+    };
+
+    const response = await request
+      .post(`/api/comlike/${existingBlog._id}/comments`)
+      .set("Authorization", `${userToken}`)
+      .send(commentData);
+
+    expect(response.status).toBe(201);
+    expect(response.body).toHaveProperty("message", "Comment added successfully");
+  });
+
+
+
+  it("should return 400 if comment data is invalid", async () => {
+    const invalidCommentData = {
+       comment: "", // Invalid data
        blogSubject: "Example Blog",
-     };
- 
-     const response = await request
+    };
+   
+    const response = await request
        .post(`/api/comlike/${existingBlog._id}/comments`)
        .set("Authorization", `${userToken}`)
-       .send(commentData);
- 
-     expect(response.status).toBe(201);
-     expect(response.body).toHaveProperty("message", "Comment added successfully");
-  });
+       .send(invalidCommentData);
+   
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty("message", "\"comment\" is not allowed to be empty");
+   });
 
+   
 
   // Test for unauthenticated comment addition
-it("should return 401 for unauthenticated comment addition", async () => {
-  const commentData = {
-     comment: "This is a test comment",
-     blogSubject: "Example Blog",
-  };
- 
-  const response = await request
-     .post(`/api/comlike/${existingBlog._id}/comments`)
-     .send(commentData); // No Authorization header
- 
-  expect(response.status).toBe(401);
- });
+  it("should return 401 for unauthenticated comment addition", async () => {
+    const commentData = {
+      comment: "This is a test comment",
+      blogSubject: "Example Blog",
+    };
 
+    const response = await request
+      .post(`/api/comlike/${existingBlog._id}/comments`)
+      .send(commentData); // No Authorization header
 
-// Test for non-existent blog in comment addition
-it("should return 404 for non-existent blog in comment addition", async () => {
-  const nonExistentBlogId = "609df8e15715ab2374e0e29f"; // Use a non-existent ID
-
-  const commentData = {
-     comment: "This is a test comment",
-     blogSubject: "Example Blog",
-  };
- 
-  const response = await request
-     .post(`/api/comlike/${nonExistentBlogId}/comments`) // Non-existent blog ID
-     .set("Authorization", `${userToken}`)
-     .send(commentData);
- 
-  expect(response.status).toBe(404);
- });
-
-
-
- });
- 
- // Test liking a blog
- describe("Like Blog", () => {
-
-  let userToken:string;
-     let existingBlog: any;
-
-    beforeAll(async () => {
-       // Create an Normal user
-       const UserUser = new User({
-         email: "like@example.com",
-         fullName: "User Role",
-         gender:"male",
-         password: "user123",
-         userRole: "user",
-       });
-       await UserUser.save();
-   
-       // Generate a JWT token for the Normal user
-       userToken = jwt.sign({ id: UserUser._id }, process.env.JWT_SECRET || "", {
-         expiresIn: "20h",
-       });
-       
-        // Create an example blog
-     existingBlog = new Blog({
-       blogTitle: "Example Blog",
-       blogDescription: "This is an example blog",
-       blogDate: new Date().toISOString(),
-       blogImage: "test.jpeg",
-     });
-     await existingBlog.save();
-       });
-
-       it("should return 400 for invalid blog ID in like request", async () => {
-        const response = await request
-           .post(`/api/comlike/invalidBlogId/like`) // Invalid blog ID
-           .set("Authorization", `${userToken}`);
-       
-        expect(response.status).toBe(400);
-       });
-
-
-  it("should like a blog when user is authenticated and has userRole of 'user'", async () => {
-     const response = await request
-       .post(`/api/comlike/${existingBlog._id}/like`)
-       .set("Authorization", `${userToken}`);
- 
-     expect(response.status).toBe(201);
-     expect(response.body).toHaveProperty("message", "Blog liked successfully");
-     expect(response.body).toHaveProperty("likes", 1);
+    expect(response.status).toBe(401);
   });
 
+  // Test for non-existent blog in comment addition
+  it("should return 404 for non-existent blog in comment addition", async () => {
+    const nonExistentBlogId = "609df8e15715ab2374e0e29f"; // Use a non-existent ID
 
+    const commentData = {
+      comment: "This is a test comment",
+      blogSubject: "Example Blog",
+    };
+
+    const response = await request
+      .post(`/api/comlike/${nonExistentBlogId}/comments`) // Non-existent blog ID
+      .set("Authorization", `${userToken}`)
+      .send(commentData);
+
+    expect(response.status).toBe(404);
+  });
+});
+
+// Test liking a blog
+describe("Like Blog", () => {
+  let userToken:string;
+  let existingBlog: any;
+
+  beforeAll(async () => {
+    // Create a Normal user
+    const UserUser = new User({
+      email: "like@example.com",
+      fullName: "User Role",
+      gender:"male",
+      password: "user123",
+      userRole: "user",
+    });
+    await UserUser.save();
+
+    // Generate a JWT token for the Normal user
+    userToken = jwt.sign({ id: UserUser._id }, process.env.JWT_SECRET || "", {
+      expiresIn: "20h",
+    });
+    
+    // Create an example blog
+    existingBlog = new Blog({
+      blogTitle: "Example Blog",
+      blogDescription: "This is an example blog",
+      blogDate: new Date().toISOString(),
+      blogImage: "test.jpeg",
+    });
+    await existingBlog.save();
+  });
+
+  it("should like a blog when user is authenticated and has userRole of 'user'", async () => {
+    const response = await request
+      .post(`/api/comlike/${existingBlog._id}/like`)
+      .set("Authorization", `${userToken}`);
+
+    expect(response.status).toBe(201);
+    expect(response.body).toHaveProperty("message", "Blog liked successfully");
+    expect(response.body).toHaveProperty("likes", 1);
+  });
+
+  it("should return 400 for already liked blog", async () => {
+    // Assuming the user has already liked the blog in a previous test
+    const response = await request
+       .post(`/api/comlike/${existingBlog._id}/like`)
+       .set("Authorization", `${userToken}`);
+   
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty("message", "You have already liked this blog");
+   });
+
+   
   // Test for unauthenticated blog liking
-it("should return 401 for unauthenticated blog liking", async () => {
-  const response = await request
-     .post(`/api/comlike/${existingBlog._id}/like`) // No Authorization header
-     .send();
- 
-  expect(response.status).toBe(401);
- });
+  it("should return 401 for unauthenticated blog liking", async () => {
+    const response = await request
+      .post(`/api/comlike/${existingBlog._id}/like`) // No Authorization header
+      .send();
 
+    expect(response.status).toBe(401);
+  });
 
+  // Test for non-existent blog in blog liking
+  it("should return 404 for non-existent blog in blog liking", async () => {
+    const nonExistentBlogId = "609df8e15715ab2374e0e29f";
+    const response = await request
+      .post(`/api/comlike/${nonExistentBlogId}/like`) // Non-existent blog ID
+      .set("Authorization", `${userToken}`);
 
- // Test for non-existent blog in blog liking
-it("should return 404 for non-existent blog in blog liking", async () => {
-  const nonExistentBlogId="609df8e15715ab2374e0e29f"
-  const response = await request
-     .post(`/api/comlike/${nonExistentBlogId}/like`) // Non-existent blog ID
-     .set("Authorization", `${userToken}`);
- 
-  expect(response.status).toBe(404);
- });
- 
- // Test for already liked blog
- it("should return 400 for already liked blog", async () => {
-  // Assuming the user has already liked the blog in a previous test
-  const response = await request
-     .post(`/api/comlike/${existingBlog._id}/like`)
-     .set("Authorization", `${userToken}`);
- 
-  expect(response.status).toBe(400);
-  expect(response.body).toHaveProperty("message", "You have already liked this blog");
- });
+    expect(response.status).toBe(404);
+  });
 
+  // Test for already liked blog
+  it("should return 400 for already liked blog", async () => {
+    // Assuming the user has already liked the blog in a previous test
+    const response = await request
+      .post(`/api/comlike/${existingBlog._id}/like`)
+      .set("Authorization", `${userToken}`);
 
- });
+    expect(response.status).toBe(400);
+    expect(response.body).toHaveProperty("message", "You have already liked this blog");
+  });
+});
+
 
   describe("Blog API Testing", () => {
     let adminToken:string;
@@ -923,6 +947,45 @@ it("should return 500 for internal server error", async () => {
  });
 
 
+    // Test for updating a blog
+    // it("should update a blog with valid data", async () => {
+    //   const blogData = {
+    //      blogTitle: "Updated Blog",
+    //      blogDescription: "This is an updated blog",
+    //      blogDate: new Date().toISOString(),
+    //      blogImage: "updatedTest.png",
+    //   };
+     
+    //   const filePath = path.join(__dirname, "updatedTest.jpg");
+    //   if (!fs.existsSync(filePath)) {
+    //      throw new Error("Test file not found");
+    //   }
+     
+    //   const response = await request
+    //      .put(`/api/blog/update-blog/${existingBlog._id}`)
+    //      .set("Authorization", `${adminToken}`)
+    //      .field("blogTitle", blogData.blogTitle)
+    //      .field("blogDescription", blogData.blogDescription)
+    //      .field("blogDate", blogData.blogDate)
+    //      .attach("blogImage", filePath);
+     
+    //   expect(response.status).toBe(200);
+    //   expect(response.body).toHaveProperty("message", "Blog successfully updated");
+    //   expect(response.body).toHaveProperty("data");
+    //   expect(response.body.data).toHaveProperty("blogTitle", blogData.blogTitle);
+    //   expect(response.body.data).toHaveProperty("blogDescription", blogData.blogDescription);
+    //   expect(response.body.data).toHaveProperty("blogDate", new Date(blogData.blogDate).toISOString());
+    //   expect(response.body.data).toHaveProperty("blogImage", expect.stringContaining("https://res.cloudinary.com"));
+    //  }, 30000); 
+     // Increase timeout to 30 seconds
+     
+// Test for getting all blogs
+it("should retrieve all blogs and return success", async () => {
+  const response = await request.get("/api/blog/getall-blog");
+  expect(response.status).toBe(200);
+  expect(response.body).toHaveProperty("data");
+  expect(response.body.data).toBeInstanceOf(Array);
+});
 
 // Error handling test for getAllBlogs
 it("should return 500 for internal server error during retrieving all blogs", async () => {
@@ -1400,13 +1463,13 @@ it("should return 500 for internal server error during blog deletion", async () 
       expect(response.body).toHaveProperty('error', 'Internal Server Error');
      });
 
+
+
+
    });
 
-
-
    
    
    
    
-
 

@@ -5,7 +5,7 @@
   "main": "index.ts",
   "scripts": {
     "start:dev": "nodemon  ./index.ts",
-    "test": "jest  ./src/tests/testing.test.ts --detectOpenHandles",
+    "test": "jest ./src/tests/testing.test.ts --detectOpenHandles --forceExit",
     "coveralls": "jest ./src/tests/testing.test.ts --coverage  --detectOpenHandles && cat ./coverage/lcov.info | coveralls"
   },
   "author": "",
