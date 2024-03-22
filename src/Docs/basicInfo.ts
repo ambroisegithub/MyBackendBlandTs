@@ -25,7 +25,6 @@ export const options = {
       servers: [
         {
           url: "http://localhost:3000",
-          
         },
       ],
     },
