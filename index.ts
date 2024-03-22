@@ -10,11 +10,13 @@ import blogRoutes from "./src/Routes/BlogRoute";
 import contactUsRoutes from "./src/Routes/contactUsRoutes";
 import subscribeRoutes from "./src/Routes/subscribeRoute";
 import swaggerUI from "swagger-ui-express";
+import swaggerJSDoc from "swagger-jsdoc";
+
 import cors from "cors";
 import helmet from "helmet";
+import { options } from "./src/Docs/basicInfo";
 
 dotenv.config();
-let docs:any;
 mongoose.set("strictQuery", false);
 mongoose
   .connect(process.env.MONGODB_URL as string)
@@ -26,6 +28,7 @@ mongoose
   });
 
 const app: Application = express();
+const specs = swaggerJSDoc(options)
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -35,9 +38,10 @@ app.use(morgan("dev"));
 app.use('/api/user', userRoutes);
 app.use('/api/blog', blogRoutes);
 app.use('/api/comlike', commentRoutes);
+// import basicInfo from './basicInfo';
 app.use('/api/contactus', contactUsRoutes);
 app.use('/api/subscribe', subscribeRoutes);
-app.use('/api-docs',swaggerUI.serve,swaggerUI.setup(docs));
+app.use('/api-docs',swaggerUI.serve,swaggerUI.setup(specs));
 
 app.get("/", (req: Request, res: Response) => {
   return res.json({ message: "Welcome To My portfolio API" });
