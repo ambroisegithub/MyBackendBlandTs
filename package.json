@@ -6,7 +6,7 @@
   "scripts": {
     "start:dev": "nodemon ./index.ts",
     "test": "jest ./src/tests/testing.test.ts --detectOpenHandles --forceExit",
-    "coveralls": "jest ./src/tests/testing.test.ts --coverage --detectOpenHandles && cat ./coverage/lcov.info | coveralls --forceExit"
+    "coveralls": "jest ./src/tests/testing.test.ts --coverage --forceExit --detectOpenHandles  && cat ./coverage/lcov.info | coveralls "
   },
   "author": "",
   "license": "ISC",
