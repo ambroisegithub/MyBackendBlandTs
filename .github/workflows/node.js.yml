@@ -39,13 +39,9 @@ jobs:
     - run: npm run build --if-present
     - run: npm test
 
-  coveralls:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install coveralls package
-        run: npm install coveralls
-      - name: Report coverage to Coveralls
-        run: npm run coveralls
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+    - name: Install coveralls package
+      run: npm install coveralls
+    - name: Report coverage to Coveralls
+      run: npm run coveralls
+      env:
+          COVERALLS_REPO_TOKEN: ${{secrets.COVERALLS_REPO_TOKEN }}
