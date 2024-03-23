@@ -6,7 +6,7 @@
   "scripts": {
     "start:dev": "nodemon  ./index.ts",
     "test": "jest ./src/tests/testing.test.ts --detectOpenHandles --forceExit",
-    "coveralls": "jest ./src/tests/testing.test.ts --coverage  --detectOpenHandles && cat ./coverage/lcov.info | coveralls"
+    "coveralls": "jest ./src/tests/testing.test.ts --coverage  --detectOpenHandles && cat ./coverage/lcov.info | coveralls --forceExit"
   },
   "author": "",
   "license": "ISC",
@@ -43,6 +43,7 @@
     "bcryptjs": "^2.4.3",
     "cloudinary": "^2.0.3",
     "cors": "^2.8.5",
+    "coveralls": "^3.1.1",
     "joi": "^17.12.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.2.1",
