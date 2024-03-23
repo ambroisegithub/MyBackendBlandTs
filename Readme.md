@@ -1,4 +1,9 @@
+
+
 # Backend TypeScript API README
+
+[![Node.js CI](https://github.com/ambroisegithub/MyBackendBlandTs/actions/workflows/node.js.yml/badge.svg)](https://github.com/ambroisegithub/MyBackendBlandTs/actions/workflows/node.js.yml)
+
 
 This is a TypeScript backend API built with Express.js. It provides endpoints for various functionalities including managing blogs, comments, subscriptions, contact us messages, and user authentication.
 
