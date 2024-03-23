@@ -5,6 +5,9 @@
 [![Node.js CI](https://github.com/ambroisegithub/MyBackendBlandTs/actions/workflows/node.js.yml/badge.svg)](https://github.com/ambroisegithub/MyBackendBlandTs/actions/workflows/node.js.yml)
 
 
+[![Coverage Status](https://coveralls.io/repos/github/ambroisegithub/MyBackendBlandTs/badge.svg?branch=Develop)](https://coveralls.io/github/ambroisegithub/MyBackendBlandTs?branch=Develop)
+
+
 This is a TypeScript backend API built with Express.js. It provides endpoints for various functionalities including managing blogs, comments, subscriptions, contact us messages, and user authentication.
 
 ## Installation
