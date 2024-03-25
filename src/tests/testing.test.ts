@@ -4,11 +4,8 @@ import { User } from "../Models/UserModel";
 import bcrypt from "bcryptjs";
 import UserMiddleware from "../Middlewares/UserMiddleware";
 
-
 import { ContactUs } from "../Models/contactUsmodels";
 import { Subscribe } from "../Models/subscribeModel";
-
-
 import { Blog } from "../Models/BlogModel";
 const request = supertest(app);
 import { Authorization } from "../Middlewares/Authorization";
@@ -229,7 +226,74 @@ it("returns 404 when updating non-existing user", async () => {
   expect(response.body).toHaveProperty("message", "User not found");
 });
 
-
+// Test for a database error during user update
+// Test for a database error during user update
+it("returns 500 when there's a database error during user update", async () => {
+  // Assuming there is a user created in the database already
+  const existingUser = await User.findOne({});
+  if (!existingUser) {
+     throw new Error("No user found in the database");
+  }
+ 
+  // Mock the User.findByIdAndUpdate method to throw an error
+  jest.spyOn(User, 'findByIdAndUpdate').mockImplementationOnce(() => {
+     throw new Error('Database error');
+  });
+ 
+  const updatedData = {
+     fullName: "Updated Name",
+     email: "updatedemail@example.com",
+     gender: "other",
+     password: "newpassword123",
+     confirmPassword: "newpassword123",
+     userRole: "admin",
+  };
+ 
+  const response = await request
+     .put(`/api/user/${existingUser._id}`)
+     .send(updatedData);
+ 
+  expect(response.status).toBe(500);
+  expect(response.body).toHaveProperty("message", "Error updating user");
+  expect(response.body).toHaveProperty("error", "Database error");
+ 
+  // Restore the original method
+  jest.restoreAllMocks();
+ });
+ 
+ // Test for a scenario where the user is not updated
+ it("returns 500 when the user is not updated", async () => {
+  // Assuming there is a user created in the database already
+  const existingUser = await User.findOne({});
+  if (!existingUser) {
+     throw new Error("No user found in the database");
+  }
+ 
+  // Mock the User.findByIdAndUpdate method to return a promise that resolves to null
+  jest.spyOn(User, 'findByIdAndUpdate').mockResolvedValueOnce(null);
+ 
+  const updatedData = {
+     fullName: "Updated Name",
+     email: "updatedemail@example.com",
+     gender: "other",
+     password: "newpassword123",
+     confirmPassword: "newpassword123",
+     userRole: "admin",
+  };
+ 
+  const response = await request
+     .put(`/api/user/${existingUser._id}`)
+     .send(updatedData);
+ 
+  expect(response.status).toBe(500);
+  expect(response.body).toHaveProperty("message", "Error updating user");
+  expect(response.body).toHaveProperty("error", "User was not updated");
+ 
+  // Restore the original method
+  jest.restoreAllMocks();
+ });
+ 
+ 
 
 it("deletes user", async () => {
   // Assuming there is a user created in the database already
@@ -1472,4 +1536,5 @@ it("should return 500 for internal server error during blog deletion", async () 
    
    
    
+
 

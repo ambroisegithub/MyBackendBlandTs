@@ -18,6 +18,8 @@ export interface IUser extends Document {
     gender: string;
     password: string;
     userRole: string;
+    createdAt:Date,
+    updatedAt:Date,
 }
 
 // User schema

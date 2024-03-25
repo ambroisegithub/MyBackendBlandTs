@@ -14,6 +14,8 @@ This is a TypeScript backend API built with Express.js. It provides endpoints fo
 
 - repository_url=https://github.com/ambroisegithub/MyBackendBlandTs.git
 
+- Hosted One=https://mybackendblandts.onrender.com/
+
 1. Clone the repository:
     ```bash
     git clone <repository_url>
