@@ -198,11 +198,27 @@ static async updateUser(req: Request, res: Response) {
 
       return res.status(200).json({
         token,
-        user,
+        userRole: user.userRole,
+        fullName: user.fullName,
         message: 'Login successful',
       });
  
   }
+
+  static async deleteAllUsers(req: Request, res: Response) {
+    try {
+      await User.deleteMany({}); 
+      return res.status(204).json({
+        message: 'All users deleted successfully',
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        message: 'Error deleting users',
+        error: error.message,
+      });
+    }
+  }
+  
 
 }
 
