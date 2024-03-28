@@ -4,6 +4,7 @@ import Joi from 'joi';
 // Validation schema
 export const UserSchemaValidate = Joi.object({
     fullName: Joi.string().required(),
+    phoneNumber:Joi.string().required(),
     email: Joi.string().email().required(),
     gender: Joi.string().valid('male', 'female', 'other').required(),
     password: Joi.string().min(6).required(),
@@ -14,6 +15,7 @@ export const UserSchemaValidate = Joi.object({
 // Creating an interface
 export interface IUser extends Document {
     fullName: string;
+    phoneNumber:string;
     email: string;
     gender: string;
     password: string;
@@ -25,6 +27,10 @@ export interface IUser extends Document {
 // User schema
 const userSchema = new Schema<IUser>({
     fullName: {
+        type: String,
+        required: true,
+    },
+    phoneNumber: {
         type: String,
         required: true,
     },

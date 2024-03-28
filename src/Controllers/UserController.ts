@@ -22,6 +22,7 @@ class UserController {
 
     const newUser = new User({
         fullName: req.body.fullName,
+        phoneNumber: req.body.phoneNumber,
         email: req.body.email,
         gender: req.body.gender,
         password: hashedPassword,
@@ -34,6 +35,7 @@ class UserController {
     const responseUser = {
         _id: savedUser._id,
         fullName: savedUser.fullName,
+        phoneNumber: savedUser.phoneNumber,
         email: savedUser.email,
         gender: savedUser.gender,
         userRole: savedUser.userRole,
@@ -94,7 +96,7 @@ static async updateUser(req: Request, res: Response) {
       });
   }
 
-  const { fullName, email, gender, password, userRole } = req.body;
+  const { fullName,phoneNumber, email, gender, password, userRole } = req.body;
 
   // Check if the password is provided, then hash it
   const hashedPassword = password ? await bcrypt.hash(password, 10) : user.password;
@@ -105,6 +107,7 @@ static async updateUser(req: Request, res: Response) {
           { _id: userId },
           {
               fullName: fullName ? fullName : user.fullName,
+              phoneNumber: phoneNumber ? phoneNumber : user.phoneNumber,
               email: email ? email : user.email,
               gender: gender ? gender : user.gender,
               password: hashedPassword,
@@ -131,6 +134,7 @@ static async updateUser(req: Request, res: Response) {
   const responseUser = {
       _id: updatedUser._id,
       fullName: updatedUser.fullName,
+      phoneNumber:updatedUser.phoneNumber,
       email: updatedUser.email,
       gender: updatedUser.gender,
       userRole: updatedUser.userRole,

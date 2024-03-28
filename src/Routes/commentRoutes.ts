@@ -8,7 +8,7 @@ const commentRoutes = Router();
 commentRoutes.use(UserMiddleware);
 
 // Route for adding a comment to a blog
-commentRoutes.post('/:blogId/comments', CommentsLikesController.addComment);
+commentRoutes.post('/comments/:blogId', CommentsLikesController.addComment);
 
 // Route for liking a blog
 commentRoutes.post('/:blogId/like', CommentsLikesController.likeBlog);

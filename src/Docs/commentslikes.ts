@@ -1,6 +1,6 @@
 /**
  * @swagger
- * /api/comlike/add-comment/{blogId}:
+ * /api/comlike/comments/{blogId}:
  *   post:
  *     summary: Add a comment to a blog.
  *     tags: [Comments]
@@ -37,7 +37,7 @@
 
 /**
  * @swagger
- * /api/comlike/like/{blogId}:
+ * /api/comlike/{blogId}/like:
  *   post:
  *     summary: Like a blog
  *     tags: [Comments]
