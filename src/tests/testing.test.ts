@@ -36,7 +36,6 @@ describe("User Signup", () => {
       fullName: "Ambroise Muhayimana",
       phoneNumber:"+250786255860",
       email: "ambroise@muhayimana.com",
-      gender: "male",
       password: "password123",
       confirmPassword: "password123",
       userRole: "user",
@@ -55,7 +54,6 @@ describe("User Signup", () => {
     expect(savedUser!.fullName).toBe(userData.fullName);
     expect(savedUser!.phoneNumber).toBe(userData.phoneNumber);
     expect(savedUser!.email).toBe(userData.email);
-    expect(savedUser!.gender).toBe(userData.gender);
     expect(savedUser!.userRole).toBe(userData.userRole);
 
     // Verify password encryption
@@ -71,7 +69,6 @@ describe("User Signup", () => {
       fullName: "Ambroise Muhayimana",
       phoneNumber:"443332332",
       email: "invalidemail",
-      gender: "male",
       password: "pass",
       confirmPassword: "pass",
     };
@@ -89,7 +86,6 @@ describe("User Signup", () => {
       fullName: "Existing User",
       phoneNumber:"+250786255860",
       email: "ambroise@muhayimana.com",
-      gender: "female",
       password: "password123",
       confirmPassword: "password123",
     };
@@ -124,7 +120,6 @@ describe("User Signup", () => {
     expect(response.body.data).toHaveProperty("fullName", existingUser.fullName);
     expect(response.body.data).toHaveProperty("phoneNumber", existingUser.phoneNumber);
     expect(response.body.data).toHaveProperty("email", existingUser.email);
-    expect(response.body.data).toHaveProperty("gender", existingUser.gender);
     expect(response.body.data).toHaveProperty("userRole", existingUser.userRole);
   });
 
@@ -152,7 +147,6 @@ it("updates user data", async () => {
     fullName: "Updated Name",
     phoneNumber: "9838237328333333333",
     email: "updatedemail@example.com",
-    gender: "other",
     password: "newpassword123",
     confirmPassword: "newpassword123",
     userRole: "admin",
@@ -166,7 +160,6 @@ it("updates user data", async () => {
   expect(response.body.data).toHaveProperty("fullName", updatedData.fullName);
   expect(response.body.data).toHaveProperty("phoneNumber", updatedData.phoneNumber);
   expect(response.body.data).toHaveProperty("email", updatedData.email);
-  expect(response.body.data).toHaveProperty("gender", updatedData.gender);
   expect(response.body.data).toHaveProperty("userRole", updatedData.userRole);
 
   // Verify that no validation errors occur
@@ -178,7 +171,6 @@ it("updates user data", async () => {
   expect(updatedUser!.fullName).toBe(updatedData.fullName);
   expect(updatedUser!.phoneNumber).toBe(updatedData.phoneNumber)
   expect(updatedUser!.email).toBe(updatedData.email);
-  expect(updatedUser!.gender).toBe(updatedData.gender);
   expect(updatedUser!.userRole).toBe(updatedData.userRole);
 });
 
@@ -194,7 +186,6 @@ it("returns 400 with error message for invalid user data during update", async (
     fullName: "", // invalid data
     email: "updatedemail@example.com",
     phoneNumber:"+2507862558609",
-    gender: "other",
     password: "newpassword123",
     confirmPassword: "newpassword123",
     userRole: "admin",
@@ -222,7 +213,6 @@ it("returns 404 when updating non-existing user", async () => {
     fullName: "Updated Name",
     phoneNumber:"+250786255860",
     email: "updatedemail@example.com",
-    gender: "other",
     password: "newpassword123",
     confirmPassword: "newpassword123",
     userRole: "admin",
@@ -254,7 +244,6 @@ it("returns 500 when there's a database error during user update", async () => {
      fullName: "Updated Name",
      phoneNumber:"+250786255860",
      email: "updatedemail@example.com",
-     gender: "other",
      password: "newpassword123",
      confirmPassword: "newpassword123",
      userRole: "admin",
@@ -287,7 +276,6 @@ it("returns 500 when there's a database error during user update", async () => {
      fullName: "Updated Name",
      phoneNumber:"+250786255860",
      email: "updatedemail@example.com",
-     gender: "other",
      password: "newpassword123",
      confirmPassword: "newpassword123",
      userRole: "admin",
@@ -342,7 +330,6 @@ it("returns 404 when attempting to delete non-existing user", async () => {
       phoneNumber:"+250786255860",
 
       email: "ambroise@muhayimana.com",
-      gender: "male",
       password: "password123",
       confirmPassword: "password123",
       userRole: "user",
@@ -580,7 +567,6 @@ describe("Add Comment to Blog", () => {
       email: "user@example.com",
       phoneNumber:"250786255860",
       fullName: "User Role",
-      gender:"male",
       password: "user123",
       userRole: "user",
     });
@@ -678,7 +664,6 @@ describe("Like Blog", () => {
       email: "like@example.com",
       phoneNumber:"+250786255860",
       fullName: "User Role",
-      gender:"male",
       password: "user123",
       userRole: "user",
     });
@@ -761,7 +746,6 @@ describe("Like Blog", () => {
          email: "admin@example.com",
          phoneNumber:"+250786255860",
          fullName: "Admin User",
-         gender:"male",
          password: "admin123",
          userRole: "admin",
        });

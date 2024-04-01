@@ -6,7 +6,6 @@ export const UserSchemaValidate = Joi.object({
     fullName: Joi.string().required(),
     phoneNumber:Joi.string().required(),
     email: Joi.string().email().required(),
-    gender: Joi.string().valid('male', 'female', 'other').required(),
     password: Joi.string().min(6).required(),
     confirmPassword: Joi.string().valid(Joi.ref('password')).required(),
     userRole: Joi.string().valid('admin', 'user').default('user'), 
@@ -17,7 +16,6 @@ export interface IUser extends Document {
     fullName: string;
     phoneNumber:string;
     email: string;
-    gender: string;
     password: string;
     userRole: string;
     createdAt:Date,
@@ -41,11 +39,7 @@ const userSchema = new Schema<IUser>({
         lowercase: true,
         trim: true,
     },
-    gender: {
-        type: String,
-        required: true,
-        enum: ['male', 'female', 'other'],
-    },
+ 
     userRole: {
         type: String,
         enum: ['admin', 'user'], 
