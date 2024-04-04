@@ -111,6 +111,21 @@ class SubscribeController {
             });
 
     }
+
+     // Count Total Users
+ static async countTotalSubscribe(req: Request, res: Response) {
+    try {
+      const totalSubscribe = await Subscribe.countDocuments();
+      return res.status(200).json({
+        totalSubscribes: totalSubscribe,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        message: 'Error counting total total Subscribe',
+        error: error.message,
+      });
+    }
+  }
 }
 
 export default SubscribeController;

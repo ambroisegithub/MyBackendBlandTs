@@ -225,6 +225,21 @@ static async updateUser(req: Request, res: Response) {
     }
   }
   
+ // Count Total Users
+ static async countTotalUsers(req: Request, res: Response) {
+  try {
+    const totalUsers = await User.countDocuments();
+    return res.status(200).json({
+      totalUsers: totalUsers,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      message: 'Error counting total users',
+      error: error.message,
+    });
+  }
+}
+
 
 }
 

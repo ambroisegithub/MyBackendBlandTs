@@ -128,5 +128,18 @@ export default class CommentsLikesController {
         return res.status(200).json({ message: "Comment deleted successfully" });
     }
     
+
+    static async getTotalComments(req: Request, res: Response) {
+        try {
+            const totalComments = await Blog.aggregate([
+                { $group: { _id: null, totalCount: { $sum: { $size: "$comments" } } } }
+            ]);
+            const totalCount = totalComments.length > 0 ? totalComments[0].totalCount : 0;
+            return res.status(200).json({ totalComments: totalCount });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ message: "Internal server error" });
+        }
+    }
     
 }

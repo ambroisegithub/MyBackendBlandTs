@@ -137,6 +137,20 @@ class BlogController {
       }
     
 }
+
+static async countTotalblogs(req: Request, res: Response) {
+  try {
+    const totalBlogs = await Blog.countDocuments();
+    return res.status(200).json({
+      totalBlogs: totalBlogs,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      message: 'Error counting total users',
+      error: error.message,
+    });
+  }
+}
 }
 
 export default BlogController;
