@@ -8,7 +8,7 @@ export const options = {
         contact: {
           name: "muhayimana ambroise",
           email: "muhayimana21@gmail.com",
-          url: "web.com",
+          url: "",
         },
       },
       components: {
@@ -24,8 +24,8 @@ export const options = {
       },
       servers: [
         {
-          url:"http://localhost:3000"
-          // url: "https://mybackendblandts.onrender.com",
+          // url:"http://localhost:3000"
+          url: "https://mybackendblandts.onrender.com",
         },
       ],
     },

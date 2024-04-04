@@ -20,6 +20,15 @@ class UserController {
         });
     }
 
+    if (req.body.userRole === 'admin') {
+        const existingAdminUser = await User.findOne({ userRole: 'admin' });
+        if (existingAdminUser) {
+            return res.status(409).json({
+                message: 'An admin user already exists',
+            });
+        }
+    }
+
     const newUser = new User({
         fullName: req.body.fullName,
         phoneNumber: req.body.phoneNumber,
@@ -51,6 +60,7 @@ class UserController {
         message: 'User successfully added',
     });
 }
+
 
 
   // READ All Users

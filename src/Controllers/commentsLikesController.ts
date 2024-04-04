@@ -45,7 +45,9 @@ export default class CommentsLikesController {
             blog.comments.push(newComment);
             await blog.save();
 
-            return res.status(201).json({ message: "Comment added successfully" });
+            return res.status(201).json({ 
+                Comment:newComment,
+                message: "Comment added successfully" });
 
     }
 
@@ -79,4 +81,52 @@ export default class CommentsLikesController {
             return res.status(201).json({ message: "Blog liked successfully", likes: blog.likes });
     
     }
+
+
+        static async getAllComments(req: Request, res: Response) {
+            try {
+                const comments = await Blog.find({ "comments": { $exists: true, $not: { $size: 0 } } }, "comments");
+                return res.status(200).json({ comments });
+            } catch (error) {
+                return res.status(500).json({ message: "Internal server error" });
+            }
+        }
+
+        static async getBlogLikes(req: Request, res: Response) {
+            try {
+                const totalLikes = await Blog.aggregate([
+                    { $group: { _id: null, totalLikes: { $sum: "$likes" } } }
+                ]);
+                
+                const totalLikesCount = totalLikes.length > 0 ? totalLikes[0].totalLikes : 0;
+    
+                return res.status(200).json({ totalLikes: totalLikesCount });
+            } catch (error) {
+                console.error(error);
+                return res.status(500).json({ message: "Internal server error" });
+            }
+        }
+
+    static async deleteComment(req: Request, res: Response) {
+        const blogId = req.params.blogId;
+        const commentId = req.params.commentId;
+    
+        const blog = await Blog.findById(blogId);
+    
+        if (!blog) {
+            return res.status(404).json({ message: "Blog not found" });
+        }
+    
+        const commentIndex = blog.comments.findIndex((comment: any) => comment._id.toString() === commentId);
+        if (commentIndex === -1) {
+            return res.status(404).json({ message: "Comment not found" });
+        }
+    
+        blog.comments.splice(commentIndex, 1);
+        await blog.save();
+    
+        return res.status(200).json({ message: "Comment deleted successfully" });
+    }
+    
+    
 }

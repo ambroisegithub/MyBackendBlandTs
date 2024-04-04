@@ -12,5 +12,8 @@ commentRoutes.post('/comments/:blogId', CommentsLikesController.addComment);
 
 // Route for liking a blog
 commentRoutes.post('/:blogId/like', CommentsLikesController.likeBlog);
-
+// Route for getting all comments
+commentRoutes.get('/comments', CommentsLikesController.getAllComments); 
+commentRoutes.get('/likes', CommentsLikesController.getBlogLikes); 
+commentRoutes.delete('/comments/:blogId/:commentId', CommentsLikesController.deleteComment);
 export default commentRoutes;
