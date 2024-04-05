@@ -7,5 +7,6 @@ contactUsRoutes.put('/update-contact-us/:id', ContactUsController.updateContactU
 contactUsRoutes.get('/getall-contact-us', ContactUsController.getAllContactUs);
 contactUsRoutes.get('/getone-contact-us/:id', ContactUsController.getOneContactUs);
 contactUsRoutes.delete('/delete-contact-us/:id', ContactUsController.deleteContactUs);
+contactUsRoutes.get("/count-Total-Contact",ContactUsController.countTotalContactUS);
 
 export default contactUsRoutes;

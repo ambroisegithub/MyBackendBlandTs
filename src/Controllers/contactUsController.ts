@@ -123,6 +123,21 @@ class ContactUsController {
       return res.status(500).json({ error: 'Internal Server Error' });
     }
   }
+
+
+  static async countTotalContactUS(req: Request, res: Response) {
+    try {
+      const totalContactUs = await ContactUs.countDocuments();
+      return res.status(200).json({
+        totalContact: totalContactUs,
+      });
+    } catch (error: any) {
+      return res.status(500).json({
+        message: 'Error counting total total total Contact Us',
+        error: error.message,
+      });
+    }
+  }
 }
 
 export default ContactUsController;
